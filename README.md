@@ -5,7 +5,7 @@
 
 - 🤔 &nbsp; Exploring new technologies and developing android applications.
 - 🎓 &nbsp; Studying Electronics and communication engineering at NIT Allahabad.
-- 🌱 &nbsp; Learning more about Android developemt, Systems Design and Networking.
+- 🌱 &nbsp; Learning more about Android development, Systems Design and Networking.
 - ✍️ &nbsp; Pursuing Graphic Design and Videography as hobbies/side hustles.
 
 <br/>
