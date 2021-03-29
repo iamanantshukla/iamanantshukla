@@ -1,4 +1,5 @@
-<h2> Hey there! I'm Anant Shukla.</h2>
+<h1 align="center">Hi 👋, I'm Anant Shukla</h1>
+<p align="left"> <img src="https://komarev.com/ghpvc/?username=iamanantshukla&label=Profile%20views&color=0e75b6&style=flat" alt="darpan1107" /> </p>
 
 <h3> 👨🏻‍💻 &nbsp;About Me </h3>
 
