@@ -1,16 +1,20 @@
-### Hi there 👋
+<h2> Hey there! I'm Anant Shukla.</h2>
 
-<!--
-**iamanantshukla/iamanantshukla** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+<h3> 👨🏻‍💻 &nbsp;About Me </h3>
 
-Here are some ideas to get you started:
+- 🤔 &nbsp; Exploring new technologies and developing android applications.
+- 🎓 &nbsp; Studying Electronics and communication engineering at NIT Allahabad.
+- 🌱 &nbsp; Learning more about Android developemt, Systems Design and Networking.
+- ✍️ &nbsp; Pursuing Graphic Design and Videography as hobbies/side hustles.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+<br/>
+
+<a href="https://github.com/AVS1508">
+  <img height="180em" src="https://github-readme-stats.vercel.app/api?username=iamanantshukla&theme=buefy&show_icons=true" />
+</a>
+<h3> 🤝🏻 &nbsp;Connect with Me </h3>
+<p align="left">
+<a href="https://www.linkedin.com/in/anant1402/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Anant%20Shukla-blue?style=flat-square&logo=linkedin"></a>
+<a href="https://www.instagram.com/adityavs_/"><img alt="Instagram" src="https://img.shields.io/badge/Instagram-anantshukla.prproj-blue?style=flat-square&logo=instagram"></a>
+<a href="mailto:anantshukla1402@gmail.com"><img alt="Email" src="https://img.shields.io/badge/Email-anantshukla1402@gmail.com-blue?style=flat-square&logo=gmail"></a>
+</p>
