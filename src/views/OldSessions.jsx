@@ -18,36 +18,43 @@ export default function OldSessions() {
       <h2 style={{ marginBottom: '24px' }}>Your Activity Feed</h2>
       <div className="grid">
         {sessions.map((s) => {
+          const ts = s.started_at || s.created_at || s.date;
+          const dateStr = ts ? new Date(ts.replace(' ', 'T')).toLocaleDateString() : 'Unknown';
+          const totalShots = s.total_shots ?? (s.shots?.length || (s.series ? s.series.reduce((sum, ser) => sum + (ser.shots?.length || 0), 0) : 0));
+          
+          const hasShots = s.hasShots ?? ((s.shots && s.shots.length > 0) || (s.series && s.series.length > 0));
+          const skillsTrained = s.skillsTrained || (s.skillFocus ? s.skillFocus.map(sf => sf.name) : []);
+
           const typeTags = [s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'];
-          if (s.hasShots) typeTags.push('Shot Calling');
-          if (s.skillsTrained && s.skillsTrained.length > 0) typeTags.push('Skill Focus');
+          if (hasShots) typeTags.push('Shot Calling');
+          if (skillsTrained && skillsTrained.length > 0) typeTags.push('Skill Focus');
 
           return (
           <div className="card feed-card" key={s.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{typeTags.join(' + ')}</h3>
-              <span className="muted" style={{ fontSize: '0.85rem', marginLeft: '12px' }}>{new Date(s.date).toLocaleDateString()}</span>
+              <span className="muted" style={{ fontSize: '0.85rem', marginLeft: '12px' }}>{dateStr}</span>
             </div>
             
             <div className="stat-grid">
               <div className="stat-item">
                 <span className="stat-label">Shots</span>
-                <span className="stat-value">{s.total_shots}</span>
+                <span className="stat-value">{totalShots}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Time</span>
-                <span className="stat-value">{Math.floor(s.duration_seconds / 60)}m {s.duration_seconds % 60}s</span>
+                <span className="stat-value">{Math.floor((s.duration_seconds || 0) / 60)}m {(s.duration_seconds || 0) % 60}s</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Pace</span>
-                <span className="stat-value">{s.total_shots ? (s.duration_seconds / s.total_shots).toFixed(1) : 0}s / shot</span>
+                <span className="stat-value">{totalShots ? ((s.duration_seconds || 0) / totalShots).toFixed(1) : 0}s / shot</span>
               </div>
               
-              {s.skillsTrained && s.skillsTrained.length > 0 && (
+              {skillsTrained && skillsTrained.length > 0 && (
                 <div className="stat-item" style={{ gridColumn: 'span 3', marginTop: '8px' }}>
                   <span className="stat-label" style={{ marginBottom: '4px' }}>Skills Trained</span>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text)' }}>
-                    {s.skillsTrained.map((skill, i) => (
+                    {skillsTrained.map((skill, i) => (
                       <span key={i} style={{ display: 'inline-block', background: 'var(--panel-2)', padding: '2px 8px', borderRadius: '4px', marginRight: '6px', marginBottom: '6px', border: '1px solid var(--line)' }}>
                         {skill}
                       </span>
