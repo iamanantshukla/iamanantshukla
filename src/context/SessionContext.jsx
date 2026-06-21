@@ -16,6 +16,7 @@ export function SessionProvider({ children }) {
   const [armedActual, setArmedActual] = useState(null);
   const [skillFocus, setSkillFocus] = useState([]); // [{skillId,name,cells:[]}]
   const [finishRequested, setFinishRequested] = useState(false);
+  const [liveNotes, setLiveNotes] = useState([]);
   const timer = useRef(null);
 
   useEffect(() => {
@@ -60,6 +61,11 @@ export function SessionProvider({ children }) {
 
   const armActual = useCallback((seriesIndex, shotN) => setArmedActual({ seriesIndex, shotN }), []);
 
+  const addLiveNote = useCallback((text) => {
+    if (!text || !text.trim()) return;
+    setLiveNotes((prev) => [...prev, { t: 0, text: text.trim() }]);
+  }, []);
+
   const ensureSeries = useCallback((index) => {
     setSeries((prev) => (prev[index] ? prev : [...prev, emptySeries(index)]));
   }, []);
@@ -67,6 +73,7 @@ export function SessionProvider({ children }) {
   const reset = useCallback(() => {
     setSeries([emptySeries(0)]); setCurrentSeries(0); setArmedActual(null);
     setSkillFocus([]); setSeconds(0); setRunning(false); setFinishRequested(false);
+    setLiveNotes([]);
   }, []);
 
   const value = {
@@ -75,6 +82,7 @@ export function SessionProvider({ children }) {
     armedActual, armActual, logCall, logActual,
     skillFocus, setSkillFocus, reset,
     finishRequested, setFinishRequested,
+    liveNotes, addLiveNote,
   };
   return <SessionCtx.Provider value={value}>{children}</SessionCtx.Provider>;
 }
