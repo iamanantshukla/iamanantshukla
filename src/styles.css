@@ -659,6 +659,14 @@ td input { min-height: 38px; border-radius: 4px; }
   .stat-col:last-child { border-bottom: none; padding-bottom: 0; }
   .stat-sub { margin-top: 0; text-align: right; max-width: 50%; }
 
+  /* Enforce 2x2 grid for the main dashboard cards on mobile */
+  .stats-dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .dashboard-card { padding: 16px 12px; border-left-width: 3px; }
+  .dashboard-card .card-header-icon { font-size: 0.8rem; margin-bottom: 8px; white-space: nowrap; }
+  .dashboard-card .stat-val-large { font-size: 1.5rem !important; line-height: 1.1; margin-bottom: 4px; }
+  .dashboard-card .stat-val-large span { font-size: 0.85rem !important; }
+  .dashboard-card .stat-sub { text-align: left; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.7rem; }
+
   .progress-label { display: none; } /* Hide text labels on narrow screens to prevent overlap */
   .progress-tracker { padding: 16px 12px; }
   

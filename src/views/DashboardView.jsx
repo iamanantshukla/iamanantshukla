@@ -50,28 +50,28 @@ export default function DashboardView() {
       {/* Top 4 Metric Cards */}
       <div className="stats-dashboard-grid" style={{ marginBottom: '32px' }}>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--good)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--good)' }}>🏃 Running (Week)</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats?.week?.running?.kms || 0} <span style={{fontSize:'1rem', color:'var(--muted)'}}>km</span></div>
-          <div className="stat-sub">{stats?.week?.running?.sessions || 0} sessions</div>
+          <div className="card-header-icon" style={{ color: 'var(--good)' }}>🏃 Running</div>
+          <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--good)' }}>{stats?.week?.running?.kms || 0} <span style={{fontSize:'1rem', color:'var(--good)', opacity: 0.8}}>km</span></div>
+          <div className="stat-sub">{stats?.week?.running?.sessions || 0} sessions this week</div>
         </div>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--warn)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--warn)' }}>😴 Sleep (Week)</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats?.week?.sleep?.avgHours || 0} <span style={{fontSize:'1rem', color:'var(--muted)'}}>hrs avg</span></div>
-          <div className="stat-sub">Consistent recovery</div>
+          <div className="card-header-icon" style={{ color: 'var(--warn)' }}>😴 Sleep Avg</div>
+          <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--warn)' }}>{stats?.week?.sleep?.avgHours || 0} <span style={{fontSize:'1rem', color:'var(--warn)', opacity: 0.8}}>hrs</span></div>
+          <div className="stat-sub">Consistent recovery ↗</div>
         </div>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--accent)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--accent)' }}>🎯 Volume (Week)</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats?.week?.sessions?.totalShots || 0} <span style={{fontSize:'1rem', color:'var(--muted)'}}>shots</span></div>
-          <div className="stat-sub">{stats?.week?.sessions?.totalHours || 0} hours trained</div>
+          <div className="card-header-icon" style={{ color: 'var(--accent)' }}>🎯 Volume</div>
+          <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent)' }}>{stats?.week?.sessions?.totalShots || 0} <span style={{fontSize:'1rem', color:'var(--accent)', opacity: 0.8}}>shots</span></div>
+          <div className="stat-sub">{stats?.week?.sessions?.totalHours || 0} hrs trained this week</div>
         </div>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--good)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--good)' }}>🏋️ Gym (Week)</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats?.week?.gym?.sessions || 0} <span style={{fontSize:'1rem', color:'var(--muted)'}}>sessions</span></div>
-          <div className="stat-sub truncate">{stats?.week?.gym?.muscles || 'None recorded'}</div>
+          <div className="card-header-icon" style={{ color: 'var(--good)' }}>🏋️ Gym</div>
+          <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--good)' }}>{stats?.week?.gym?.sessions || 0} <span style={{fontSize:'1rem', color:'var(--good)', opacity: 0.8}}>days</span></div>
+          <div className="stat-sub truncate">{stats?.week?.gym?.muscles ? `Targeted ${stats.week.gym.muscles}` : 'Rest week'}</div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         {/* Last Session / Recent Matches Mockup */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ borderBottom: '1px solid var(--line)', paddingBottom: '12px', marginBottom: '16px' }}>Recent Sessions</h3>
