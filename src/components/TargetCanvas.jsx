@@ -11,10 +11,15 @@ const BLACK_FROM_RING = 7; // rings <=7 area is black on the AP target
 
 export default function TargetCanvas({ shots = [], onTap, armed }) {
   const ref = useRef(null);
+  const lastTapRef = useRef(0);
   const [zoom, setZoom] = useState(1);
   const viewSpan = SPAN / zoom; // smaller span = zoomed in, centered on bull
 
   function handle(e) {
+    const now = Date.now();
+    if (now - lastTapRef.current < 400) return; // prevent duplicate taps
+    lastTapRef.current = now;
+
     const svg = ref.current;
     const rect = svg.getBoundingClientRect();
     const px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
