@@ -30,7 +30,7 @@ export default function App() {
   if (lockOwner !== 'hosted') return <LockGate owner={lockOwner} onLocked={() => setLockOwner('hosted')} />;
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <SessionProvider>
         <NavBar onLogout={async () => { await api.logout(); setAuthed(false); }} />
         <main className="content">
