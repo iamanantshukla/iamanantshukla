@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shooting Journal - Cloud</title>
+    <!-- SEO Best Practices -->
+    <meta name="description" content="Cloud portal for your Shooting Journal. Start and end sessions directly from your phone or browser.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="background-elements">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="glass-container">
+        <header>
+            <div class="logo-container">
+                <div class="logo-icon">🎯</div>
+                <h1>Shooting Journal</h1>
+            </div>
+            <p class="subtitle">Cloud Portal</p>
+        </header>
+
+        <!-- Unauthenticated View -->
+        <section id="login-section" class="view active">
+            <p class="instruction">Please sign in with Google to access your journal data.</p>
+            <div id="g_id_onload"
+                 data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE"
+                 data-context="use"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="pill"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
+            <div style="margin-top: 2rem;">
+                <!-- Fallback OAuth 2.0 flow button -->
+                <button id="authorize_button" class="btn primary-btn" onclick="handleAuthClick()">Log in with Google</button>
+            </div>
+        </section>
+
+        <!-- Authenticated Dashboard View -->
+        <section id="dashboard-section" class="view">
+            <div class="user-profile">
+                <img id="user-avatar" src="" alt="User Avatar">
+                <div class="user-details">
+                    <span id="user-name">Welcome, Shooter</span>
+                    <span id="sync-status">Status: Checking Drive...</span>
+                </div>
+                <button id="signout_button" class="btn icon-btn" onclick="handleSignoutClick()" title="Sign Out">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Controls -->
+                <div class="card controls-card">
+                    <h2>Session Controls</h2>
+                    <div class="action-buttons">
+                        <button id="btn-start-session" class="btn action-btn start-btn">Start Session</button>
+                        <button id="btn-end-session" class="btn action-btn end-btn" disabled>End Session</button>
+                    </div>
+                </div>
+
+                <!-- Latest Metrics -->
+                <div class="card metrics-card">
+                    <h2>Daily Updates</h2>
+                    <div id="metrics-content" class="metrics-content">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your latest data...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- App Logic -->
+    <script src="app.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>
