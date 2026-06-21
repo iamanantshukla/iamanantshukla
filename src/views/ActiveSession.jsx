@@ -12,6 +12,9 @@ export default function ActiveSession() {
   const [showSummary, setShowSummary] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const addNote = () => { if (noteText.trim()) { s.addLiveNote(noteText); setNoteText(''); setNoteOpen(false); } };
 
   const shots = s.series[s.currentSeries]?.shots || [];
 
@@ -48,7 +51,8 @@ export default function ActiveSession() {
         series: s.series,
         skillFocus: s.skillFocus,
         comments,
-        manual_shots: Number(manualShots) || 0
+        manual_shots: Number(manualShots) || 0,
+        live_notes: s.liveNotes,
       });
       setShowSummary(false);
       s.reset();
@@ -66,8 +70,18 @@ export default function ActiveSession() {
         <button className={subtab === 'shot' ? 'active' : ''} onClick={() => setSubtab('shot')}>Shot Calling</button>
         <button className={subtab === 'skill' ? 'active' : ''} onClick={() => setSubtab('skill')}>Skill Focus</button>
         <div style={{ flex: 1 }} />
+        <button className="secondary" onClick={() => setNoteOpen(o => !o)}>+ Note</button>
         <button onClick={() => setShowSummary(true)}>Finish Session</button>
       </div>
+      {noteOpen && (
+        <div className="live-note">
+          <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="What did you feel this shot? (e.g. pulled left, grip slipped)" />
+          <button onClick={addNote}>Save note</button>
+        </div>
+      )}
+      {s.liveNotes.length > 0 && (
+        <ul className="live-note-list">{s.liveNotes.map((n, i) => <li key={i}>{n.text}</li>)}</ul>
+      )}
       {msg && <p className="muted">{msg}</p>}
 
       {/* Both subtabs stay mounted; we only hide to preserve state. */}
@@ -94,6 +108,7 @@ export default function ActiveSession() {
         <SummaryModal
           session={{ series: s.series, skillFocus: s.skillFocus }}
           activeTab={subtab}
+          liveNotes={s.liveNotes}
           onClose={() => setShowSummary(false)}
           onSave={save}
           saving={saving}

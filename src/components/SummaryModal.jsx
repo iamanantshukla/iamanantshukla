@@ -21,7 +21,7 @@ function Overlay({ points, color, solid }) {
   );
 }
 
-export default function SummaryModal({ session, activeTab, onClose, onSave, saving, initialComments = '', onSaveComments }) {
+export default function SummaryModal({ session, activeTab, onClose, onSave, saving, initialComments = '', onSaveComments, liveNotes = [] }) {
   const [comments, setComments] = useState(initialComments);
   const [manualShots, setManualShots] = useState('');
   const [savingComments, setSavingComments] = useState(false);
@@ -143,6 +143,13 @@ export default function SummaryModal({ session, activeTab, onClose, onSave, savi
             </div>
           )}
         </div>
+
+        {liveNotes.length > 0 && (
+          <div className="form-group">
+            <label style={{ display: 'block', marginBottom: '8px' }}>In-session notes</label>
+            <ul className="live-note-list">{liveNotes.map((n, i) => <li key={i}>{n.text}</li>)}</ul>
+          </div>
+        )}
 
         {onSave ? (
           <div className="form-group" style={{ marginTop: '16px', marginBottom: '16px' }}>

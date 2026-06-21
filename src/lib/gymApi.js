@@ -6,7 +6,7 @@ import { getAccessToken } from './auth.js';
 // real id is set (paste it in here, or call gymApi.setFileId(id) at runtime). See UI_UPDATE.md.
 let gymFileId = 'PLACEHOLDER_GYM_DRIVE_FILE_ID';
 const usingPlaceholder = () => gymFileId.startsWith('PLACEHOLDER');
-let store = { workouts: [] };
+let store = { workouts: [], orderOverrides: {} };
 let initialized = false;
 
 async function syncFromDrive() {
@@ -15,7 +15,7 @@ async function syncFromDrive() {
   const res = await fetch(`https://www.googleapis.com/drive/v3/files/${gymFileId}?alt=media`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (res.ok) { try { store = { workouts: [], ...(await res.json()) }; } catch { /* empty file */ } }
+  if (res.ok) { try { store = { workouts: [], orderOverrides: {}, ...(await res.json()) }; } catch { /* empty file */ } }
   initialized = true;
 }
 async function syncToDrive() {
@@ -59,7 +59,12 @@ export const gymApi = {
     await syncToDrive();
     return workout;
   },
+  getOrder: (dayKey) => store.orderOverrides?.[dayKey] || [],
+  setOrder: async (dayKey, names) => {
+    store.orderOverrides = { ...(store.orderOverrides || {}), [dayKey]: names };
+    await syncToDrive();
+  },
   // test helpers
-  _reset: () => { store = { workouts: [] }; initialized = false; },
-  _seed: (workouts) => { store = { workouts }; initialized = true; },
+  _reset: () => { store = { workouts: [], orderOverrides: {} }; initialized = false; },
+  _seed: (workouts, orderOverrides = {}) => { store = { workouts, orderOverrides }; initialized = true; },
 };

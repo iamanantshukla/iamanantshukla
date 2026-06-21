@@ -30,4 +30,11 @@ describe('gymApi', () => {
     expect(w.totalVolumeKg).toBe(960); // 60*8 + 60*8
     expect(fetchMock).toHaveBeenCalled();
   });
+
+  it('persists a per-day exercise order override', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+    await gymApi.setOrder('day5', ['Reverse Barbell Curls', 'Barbell Bench Press']);
+    expect(gymApi.getOrder('day5')).toEqual(['Reverse Barbell Curls', 'Barbell Bench Press']);
+    expect(gymApi.getOrder('day1')).toEqual([]); // none set
+  });
 });

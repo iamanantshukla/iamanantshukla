@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import WeekStrip from '../components/WeekStrip.jsx';
+import { localDateString } from '../lib/gymDates.js';
 
 function getLocalDateString(d) {
   const year = d.getFullYear();
@@ -73,12 +75,12 @@ export default function DailyJournal() {
 
   return (
     <div>
-      <div className="subtabs" style={{ marginBottom: '24px' }}>
-        <button onClick={() => shiftDay(-1)}>← Previous</button>
-        <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{dateObj.toLocaleDateString()}</span>
-        <button onClick={() => shiftDay(1)}>Next →</button>
-        <button onClick={() => setDateObj(new Date())} style={{ marginLeft: '16px' }}>Today</button>
-      </div>
+      <WeekStrip
+        anchor={dateObj}
+        selected={dateStr}
+        onSelect={(ds) => setDateObj(new Date(ds + 'T00:00:00'))}
+        dots={{}}
+      />
 
       <div className="journal-layout">
         <div>
@@ -125,6 +127,12 @@ export default function DailyJournal() {
                   <div style={{ background: 'var(--panel-2)', padding: '12px', borderRadius: 'var(--radius)', borderLeft: '3px solid var(--accent)', fontSize: '0.9em', whiteSpace: 'pre-wrap' }}>
                     <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text)' }}>"{s.comments}"</p>
                   </div>
+                )}
+
+                {s.live_notes && s.live_notes.length > 0 && (
+                  <ul className="live-note-list" style={{ marginTop: 8 }}>
+                    {s.live_notes.map((n, i) => <li key={i}>{n.text}</li>)}
+                  </ul>
                 )}
               </div>
             )})}
