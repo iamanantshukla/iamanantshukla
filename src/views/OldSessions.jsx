@@ -10,6 +10,13 @@ export default function OldSessions() {
 
   async function view(id) {
     const full = await api.getSession(id);
+    if (!full.payload) {
+      full.payload = {
+        shots: full.shots || [],
+        series: full.series || [],
+        skillFocus: full.skillFocus || []
+      };
+    }
     setOpen(full);
   }
 
@@ -20,10 +27,42 @@ export default function OldSessions() {
         {sessions.map((s) => {
           const ts = s.started_at || s.created_at || s.date;
           const dateStr = ts ? new Date(ts.replace(' ', 'T')).toLocaleDateString() : 'Unknown';
-          const totalShots = s.total_shots ?? (s.shots?.length || (s.series ? s.series.reduce((sum, ser) => sum + (ser.shots?.length || 0), 0) : 0));
           
-          const hasShots = s.hasShots ?? ((s.shots && s.shots.length > 0) || (s.series && s.series.length > 0));
-          const skillsTrained = s.skillsTrained || (s.skillFocus ? s.skillFocus.map(sf => sf.name) : []);
+          let calculatedSkillShots = 0;
+          if (s.skillFocus && s.skillFocus.length > 0) {
+            const chunkedTables = [];
+            let currentTable = [];
+            let currentSeen = new Set();
+            s.skillFocus.forEach((row) => {
+              if (currentSeen.has(row.skillId || row.name)) {
+                chunkedTables.push(currentTable);
+                currentTable = [];
+                currentSeen.clear();
+              }
+              currentTable.push(row);
+              currentSeen.add(row.skillId || row.name);
+            });
+            if (currentTable.length > 0) chunkedTables.push(currentTable);
+
+            chunkedTables.forEach(table => {
+              let maxCols = 0;
+              table.forEach(row => {
+                let filled = 0;
+                row.cells.forEach(c => { if (c && c !== '') filled++; });
+                if (filled > maxCols) maxCols = filled;
+              });
+              calculatedSkillShots += maxCols;
+            });
+          }
+
+          let totalShots = s.total_shots || 0;
+          if (totalShots === 0) {
+            totalShots = (s.shots?.length || (s.series ? s.series.reduce((sum, ser) => sum + (ser.shots?.length || 0), 0) : 0));
+            totalShots = Math.max(totalShots, calculatedSkillShots);
+          }
+          
+          const hasShots = s.hasShots ?? (totalShots > 0);
+          const skillsTrained = s.skillsTrained || (s.skillFocus ? [...new Set(s.skillFocus.map(sf => sf.name))] : []);
 
           const typeTags = [s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'];
           if (hasShots) typeTags.push('Shot Calling');
