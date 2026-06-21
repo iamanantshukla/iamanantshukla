@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
 import ReviewsView from './ReviewsView.jsx';
+import { IconActivity, IconMoon, IconTarget, IconDumbbell } from '../components/Icons.jsx';
 
 function ProgressBar({ label, value, color }) {
   return (
@@ -50,22 +51,22 @@ export default function DashboardView() {
       {/* Top 4 Metric Cards */}
       <div className="stats-dashboard-grid" style={{ marginBottom: '32px' }}>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--good)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--good)' }}>🏃 Running</div>
+          <div className="card-header-icon" style={{ color: 'var(--good)' }}><IconActivity size={18} /> Running</div>
           <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--good)' }}>{stats?.week?.running?.kms || 0} <span style={{fontSize:'1rem', color:'var(--good)', opacity: 0.8}}>km</span></div>
           <div className="stat-sub">{stats?.week?.running?.sessions || 0} sessions this week</div>
         </div>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--warn)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--warn)' }}>😴 Sleep Avg</div>
+          <div className="card-header-icon" style={{ color: 'var(--warn)' }}><IconMoon size={18} /> Sleep Avg</div>
           <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--warn)' }}>{stats?.week?.sleep?.avgHours || 0} <span style={{fontSize:'1rem', color:'var(--warn)', opacity: 0.8}}>hrs</span></div>
           <div className="stat-sub">Consistent recovery ↗</div>
         </div>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--accent)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--accent)' }}>🎯 Volume</div>
+          <div className="card-header-icon" style={{ color: 'var(--accent)' }}><IconTarget size={18} /> Volume</div>
           <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent)' }}>{stats?.week?.sessions?.totalShots || 0} <span style={{fontSize:'1rem', color:'var(--accent)', opacity: 0.8}}>shots</span></div>
           <div className="stat-sub">{stats?.week?.sessions?.totalHours || 0} hrs trained this week</div>
         </div>
         <div className="card dashboard-card" style={{ borderLeftColor: 'var(--good)' }}>
-          <div className="card-header-icon" style={{ color: 'var(--good)' }}>🏋️ Gym</div>
+          <div className="card-header-icon" style={{ color: 'var(--good)' }}><IconDumbbell size={18} /> Gym</div>
           <div className="stat-val-large" style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--good)' }}>{stats?.week?.gym?.sessions || 0} <span style={{fontSize:'1rem', color:'var(--good)', opacity: 0.8}}>days</span></div>
           <div className="stat-sub truncate">{stats?.week?.gym?.muscles ? `Targeted ${stats.week.gym.muscles}` : 'Rest week'}</div>
         </div>

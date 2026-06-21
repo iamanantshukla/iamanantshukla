@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSession } from '../context/SessionContext.jsx';
-import Timer from './Timer.jsx';
+import { IconHome, IconTarget, IconPlay, IconList, IconUser } from './Icons.jsx';
 
 export default function NavBar({ onLogout }) {
-  const { mode, setMode, finishRequested } = useSession();
+  const { running, seconds, finishRequested, play } = useSession();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -13,34 +13,55 @@ export default function NavBar({ onLogout }) {
     }
   }, [finishRequested, navigate]);
 
-  const navItem = (to, label) => (
-    <NavLink 
-      to={to} 
-      className={({ isActive }) => (isActive ? 'active' : '')}
-    >
-      {label}
-    </NavLink>
-  );
+  const formatTime = (totalSeconds) => {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const handleFabClick = () => {
+    if (!running && seconds === 0) {
+      play();
+    }
+    navigate('/active');
+  };
 
   return (
-    <nav className="nav">
-      <span className="brand">STRAVA / SHOOT</span>
-      <div className="spacer" style={{ flex: 1 }}></div>
-      <div className="tabs-pill">
-        {navItem('/dashboard', 'Dashboard')}
-        {navItem('/skills', 'Skills')}
-        {navItem('/sessions', 'Feed')}
-        {navItem('/coach', 'AI Coach')}
-        {navItem('/plan', 'Training Plan')}
+    <>
+      <div className="top-bar">
+        <span className="brand-logo">SHOOTLOG</span>
+        <button className="secondary logout-btn" onClick={onLogout}>Logout</button>
       </div>
-      <div className="spacer" style={{ flex: 1 }}></div>
-      <div className="toggle" role="group" aria-label="Training mode">
-        <button className={mode === 'live' ? 'on' : ''} onClick={() => setMode('live')}>Live</button>
-        <button className={mode === 'dry' ? 'on' : ''} onClick={() => setMode('dry')}>Dry</button>
-      </div>
-      <Timer />
-      <button className="primary" onClick={() => navigate('/active')} style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '999px', fontWeight: 600, cursor: 'pointer', marginLeft: '8px' }}>Start Session</button>
-      <button className="secondary" onClick={onLogout} style={{ marginLeft: '8px' }}>Logout</button>
-    </nav>
+
+      <nav className="bottom-nav">
+        <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconHome size={22} />
+          <span>Home</span>
+        </NavLink>
+        <NavLink to="/skills" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconTarget size={22} />
+          <span>Skills</span>
+        </NavLink>
+        
+        <div className="nav-fab-container">
+          <button className={`nav-fab ${running || seconds > 0 ? 'running' : ''}`} onClick={handleFabClick}>
+            {running || seconds > 0 ? (
+              <span className="fab-timer">{formatTime(seconds)}</span>
+            ) : (
+              <IconPlay size={28} />
+            )}
+          </button>
+        </div>
+
+        <NavLink to="/sessions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconList size={22} />
+          <span>Feed</span>
+        </NavLink>
+        <NavLink to="/journal" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconUser size={22} />
+          <span>Profile</span>
+        </NavLink>
+      </nav>
+    </>
   );
 }
