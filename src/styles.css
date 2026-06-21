@@ -623,3 +623,50 @@ td input { min-height: 38px; border-radius: 4px; }
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Mobile Responsive Overrides */
+@media (max-width: 768px) {
+  body { font-size: 14px; }
+  .content { padding: 16px 12px; }
+  
+  .nav { padding: 12px; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .nav .brand { margin: 0; padding-bottom: 4px; }
+  .nav .spacer { display: none; }
+  
+  .tabs-pill { 
+    width: 100%; 
+    overflow-x: auto; 
+    white-space: nowrap; 
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    justify-content: flex-start;
+  }
+  .tabs-pill::-webkit-scrollbar { display: none; }
+  
+  .nav .mode { width: 100%; justify-content: center; margin-top: 4px; }
+
+  .subtabs { flex-wrap: wrap; }
+  .subtabs button { flex: 1; white-space: nowrap; }
+
+  .dashboard-stat-row { grid-template-columns: 1fr; gap: 12px; }
+  .stat-col { 
+    flex-direction: row; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid var(--line); 
+    padding-bottom: 8px; 
+  }
+  .stat-col:last-child { border-bottom: none; padding-bottom: 0; }
+  .stat-sub { margin-top: 0; text-align: right; max-width: 50%; }
+
+  .progress-label { display: none; } /* Hide text labels on narrow screens to prevent overlap */
+  .progress-tracker { padding: 16px 12px; }
+  
+  .reviews-header { flex-direction: column; align-items: flex-start; }
+  .reviews-tabs { width: 100%; overflow-x: auto; white-space: nowrap; padding-bottom: 8px; }
+  .review-content-area { padding: 16px 12px; }
+
+  .card { padding: 16px; }
+  
+  .gate-card { padding: 24px; }
+}
