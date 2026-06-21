@@ -15,6 +15,7 @@ Design principles:
 - **Character without a real AI** — Pebble is present (header avatar, the "Pebble says" voice, the center nav button) even though no live AI runs in this client. Today the voice is static; the wiring comes later.
 - **Redesign around features, never hide them** — every existing capability (shot calling, skill focus, sessions feed, skills catalogue, AI reviews, daily journal, the future Coach/Plan stubs) keeps a clear home in the new structure.
 - **Glance, then deep-dive** — home is an overview ("today board" + how I'm doing); each item drills into its full screen.
+- **No emojis in the UI.** All iconography is custom inline SVG line-icons (extending `src/components/Icons.jsx`), never emoji glyphs — emojis render inconsistently across iOS/macOS and cheapen the crafted look. The "Pebble says" panel and the character use the **Pebble SVG mark**, not the 🐧 glyph. The few emojis shown in the mockups (🐧 🏋️ 🎯 📓 😴 🏃) are placeholders only and must be replaced with SVG icons in implementation: gym = dumbbell, shooting = target/crosshair, journal = notebook, sleep = moon, run = shoe/route, plus a small **Pebble mark** as the "Pebble says" badge. Icons inherit `currentColor` so they recolor with the theme.
 
 ---
 
@@ -24,10 +25,11 @@ Design principles:
 - **Form:** a rounded coral "pebble" body with a small head-tuft, cream belly, two dot eyes, and a small triangle beak. Abstract enough to read as a friendly companion/logo, concrete enough to be a penguin. (Locked from the "Pebble" blob option.)
 - **Where Pebble appears:**
   - **Home header avatar** (top-left, next to the greeting).
-  - **"Pebble says" voice panel** on home (see §5).
+  - **"Pebble says" voice panel** on home (see §5) — the panel badge is the Pebble mark, not an emoji.
   - **Center nav button** — Pebble's face in a solid coral disc; tapping opens the quick-start menu.
   - **Empty / rest states** — e.g. the Gym rest-day card.
-- **Art delivery:** a single inline SVG component (`Pebble.jsx`) with size + variant props (`full` body for headers/FAB, `face` for tiny contexts), so it scales crisply from 24px to 80px. No raster assets.
+- **Expressive faces (in place of emojis):** Pebble has a small set of **facial expressions/moods** driven by an `expression` prop, used wherever the mockups used an emoji and wherever the app wants personality. The base face (two dot eyes + triangle beak) changes to convey state — e.g. `happy/cheer` (home "you're doing great", workout complete), `sleepy` (rest day, low-sleep journal), `focused` (active shooting session), `resting` (rest-day card), `neutral` (default greeting). This keeps one consistent character voice instead of generic emoji glyphs. Functional/affordance icons (nav, fields, agenda rows) still use plain SVG line-icons; Pebble's expressive face is used for character moments and "how you're doing" cues.
+- **Art delivery:** a single inline SVG component (`Pebble.jsx`) with `size`, `variant` (`full` body for headers/FAB, `face` for tiny contexts), and `expression` props, so it scales crisply from 24px to 80px and can show moods. No raster assets, no emoji.
 
 ---
 
@@ -67,10 +69,10 @@ This is a **palette + component restyle**, not a rewrite of the CSS architecture
 - **Icons:** line/outline style, ~24px, label beneath. Coral when active, warm-grey otherwise.
   - Home = house · Gym = dumbbell · Shoot = target/crosshair · Journal = notebook.
   - **Center = Pebble's face** in a coral disc, raised above the bar. Replaces the old play/timer FAB.
-- **Center button behavior:** opens a **quick-start bottom sheet**:
-  - 🎯 **Shooting session** — choose dry/live + shot-calling/skill-focus, then start (this is the old NavBar start-session modal, relocated into the sheet).
-  - 🏋️ **Today's workout** — jumps into the Gym → Today screen for the current split day.
-  - 📓 **Journal entry** — opens today's journal.
+- **Center button behavior:** opens a **quick-start bottom sheet** (each row uses its SVG icon, no emoji):
+  - **Shooting session** (target icon) — choose dry/live + shot-calling/skill-focus, then start (this is the old NavBar start-session modal, relocated into the sheet).
+  - **Today's workout** (dumbbell icon) — jumps into the Gym → Today screen for the current split day.
+  - **Journal entry** (notebook icon) — opens today's journal.
 - **Active-session affordance (timer must NOT be lost):** the old design used the center FAB as the play/pause timer. Since the center button is now Pebble/quick-start, the running session and its **pause/resume timer** move to a **persistent running-session bar** pinned just above the bottom nav whenever a session is active. The bar shows the live MM:SS timer (tabular nums) and a **pause/resume** toggle, and tapping it returns to **Shoot ▸ Session**. The underlying `SessionContext` `play`/`pause`/`seconds`/`running` state is unchanged — only the control's location moves. This preserves the existing pause/resume behavior.
 
 ### Where every existing feature lives (nothing dropped)
@@ -101,11 +103,11 @@ Agenda-first overview. Top to bottom:
    - Today = coral pill.
    - A small dot under each day: **green = something done/logged**, **grey = planned (workout scheduled)**, **none = rest day**.
    - **Tapping a day** changes the board below to that day: a future day shows what's **planned** (header softens to "Looking ahead / Planned"); a past day shows what was **logged** (✓ on completed items). Today is the default.
-3. **"Pebble says" panel** — a card with a "🐧 Pebble says" label and a short status line ("You're doing great — recovery's solid…"). **Static text for now**, later sourced from a dedicated Drive file (see §8). This is the Garmin-style "how you're doing" word.
-4. **Today (agenda)** — the day's actionable items as large tappable rows, each → its deep-dive:
-   - 🏋️ today's gym day (e.g. "Day 5 · Upper Body — 6 lifts") → Gym ▸ Today
-   - 🎯 shooting session ("Tap to start · last 9.4 avg") → Shoot ▸ Session
-   - 📓 daily journal ("Not logged yet") → Journal
+3. **"Pebble says" panel** — a card with a **Pebble mark** + "Pebble says" label and a short status line ("You're doing great — recovery's solid…"). **Static text for now**, later sourced from a dedicated Drive file (see §8). This is the Garmin-style "how you're doing" word.
+4. **Today (agenda)** — the day's actionable items as large tappable rows (each with its SVG icon), each → its deep-dive:
+   - today's gym day (dumbbell icon; e.g. "Day 5 · Upper Body — 6 lifts") → Gym ▸ Today
+   - shooting session (target icon; "Tap to start · last 9.4 avg") → Shoot ▸ Session
+   - daily journal (notebook icon; "Not logged yet") → Journal
 5. **This week (stats)** — compact stat tiles (avg sleep, shots, gym days, run km) with trend hints (▲ 6%). These reuse `api.getStats()` week rollups (already computed in `api.js`).
 
 The old `DashboardView` mockup content (hardcoded "Recent Sessions" list and "Skill Confidence Breakdown" with fake values) is **removed**; the embedded `ReviewsView` moves to Shoot ▸ Reviews. Home stats come from real data only.
@@ -182,7 +184,7 @@ workout = {
 
 ### Journal — restyled `DailyJournal`
 - **Week-day picker** (same Mon–Sun strip pattern as home) to choose the day.
-- That day's fields with large, friendly inputs: 😴 **Sleep**, 🏃 **Run (km)**, 🏋️ **Gym summary**, 📝 **Notes/observation**.
+- That day's fields with large, friendly inputs, each with an SVG icon (no emoji): **Sleep** (moon), **Run (km)** (shoe/route), **Gym summary** (dumbbell), **Notes/observation** (pencil).
 - **Auto-fill:** gym and shooting summaries for the day drop in automatically from their logs, so the day is "complete" without re-typing. Manual fields remain editable.
 - Keeps the existing `api.getJournal` / `api.saveJournal` data model (running, running_kms, gym, gym_muscles, sleeping_hours, observation), extended so the gym summary can be populated from a logged workout.
 
@@ -219,7 +221,7 @@ A living doc capturing what changed and what's pending. It must include:
 ## 10. Component / File Plan (high level)
 
 New:
-- `src/components/Pebble.jsx` — the SVG character (size + variant props).
+- `src/components/Pebble.jsx` — the SVG character (`size`, `variant`, `expression` props; expressions: neutral/happy/sleepy/focused/resting).
 - `src/components/WeekStrip.jsx` — Mon–Sun calendar row (used by Home + Journal).
 - `src/components/QuickStartSheet.jsx` — center-button bottom sheet.
 - `src/views/Home.jsx` — today board (replaces `DashboardView` as the landing view).
@@ -232,6 +234,7 @@ New:
 
 Updated:
 - `src/styles.css` — new warm-dark tokens + new component styles.
+- `src/components/Icons.jsx` — extend with the line-icon set replacing all emoji: home (house), gym (dumbbell), shoot (target/crosshair), journal (notebook), moon, run (shoe/route), pencil, plus any agenda/field icons. All `currentColor`.
 - `src/App.jsx` — new routes + redirects from old paths.
 - `src/components/NavBar.jsx` — 4 tabs + Pebble center button; session-start modal moves into QuickStartSheet.
 - `src/views/DailyJournal.jsx` — restyle + WeekStrip + auto-fill.
