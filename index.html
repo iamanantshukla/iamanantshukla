@@ -33,24 +33,11 @@
         <!-- Unauthenticated View -->
         <section id="login-section" class="view active">
             <p class="instruction">Please sign in with Google to access your journal data.</p>
-            <div id="g_id_onload"
-                 data-client_id="235655418368-kqfijrs3pkiugp1ji5brr727jkfqqh77.apps.googleusercontent.com"
-                 data-context="use"
-                 data-ux_mode="popup"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="pill"
-                 data-theme="outline"
-                 data-text="signin_with"
-                 data-size="large"
-                 data-logo_alignment="left">
-            </div>
             <div style="margin-top: 2rem;">
-                <!-- Fallback OAuth 2.0 flow button -->
-                <button id="authorize_button" class="btn primary-btn" onclick="handleAuthClick()">Log in with Google</button>
+                <button id="authorize_button" class="btn primary-btn" onclick="handleAuthClick()">
+                    <svg style="width: 20px; height: 20px; margin-right: 8px; fill: white;" viewBox="0 0 24 24"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a5.95 5.95 0 1 1 0-11.9 5.86 5.86 0 0 1 4.103 1.639l2.793-2.793A9.878 9.878 0 0 0 12.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.761h-9.426z"/></svg>
+                    Log in with Google
+                </button>
             </div>
         </section>
 
