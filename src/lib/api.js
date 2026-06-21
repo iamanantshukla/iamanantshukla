@@ -120,15 +120,40 @@ export const api = {
   },
 
   getJournal: async (date) => {
-    return dataStore.journals.find(j => j.date === date) || null;
+    const j = dataStore.journals.find(x => x.date === date);
+    if (!j) {
+      return {
+        date,
+        running: 0,
+        running_kms: '',
+        gym: 0,
+        gym_muscles: '',
+        sleeping_hours: '',
+        observation: '',
+        ai_review: '',
+        ai_review_status: 'none'
+      };
+    }
+    // Map boolean back to 0/1 for the UI which checks `=== 1`
+    return {
+      ...j,
+      running: j.running ? 1 : 0,
+      gym: j.gym ? 1 : 0
+    };
   },
 
   saveJournal: async (date, payload) => {
     let j = dataStore.journals.find(x => x.date === date);
+    // Map 0/1 back to boolean for JSON
+    const mappedPayload = {
+      ...payload,
+      running: payload.running === true || payload.running === 1,
+      gym: payload.gym === true || payload.gym === 1
+    };
     if (j) {
-      Object.assign(j, payload);
+      Object.assign(j, mappedPayload);
     } else {
-      j = { date, ...payload };
+      j = { date, ...mappedPayload };
       dataStore.journals.push(j);
     }
     await syncToDrive();
@@ -136,7 +161,6 @@ export const api = {
   },
 
   getStats: async (date = '') => {
-    // Generate basic stats from store
     const today = date || new Date().toISOString().split('T')[0];
     const sess = dataStore.sessions.filter(s => s.started_at.startsWith(today));
     return {
@@ -147,11 +171,23 @@ export const api = {
   },
 
   getDailyReview: async (date) => {
-    return dataStore.reviews.daily[date] || null;
+    const j = dataStore.journals.find(x => x.date === date);
+    if (!j || !j.ai_review) {
+      return { ai_review: '', ai_review_status: 'none', ai_review_progress: null };
+    }
+    return {
+      ai_review: j.ai_review,
+      ai_review_status: j.ai_review_status || 'completed',
+      ai_review_progress: j.ai_review_progress || null
+    };
   },
 
   getWeeklyReview: async (weekStartDate) => {
-    return dataStore.reviews.weekly[weekStartDate] || null;
+    const w = dataStore.reviews.weekly[weekStartDate];
+    if (!w) {
+      return { review: '', status: 'none', progress: null };
+    }
+    return w;
   },
 
   triggerDailyReview: async () => {
