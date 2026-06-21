@@ -5,15 +5,15 @@ import { useSession } from '../context/SessionContext.jsx';
 import { IconTarget, IconDumbbell, IconNotebook } from './Icons.jsx';
 
 export default function QuickStartSheet({ open, onClose }) {
-  const { setMode, setFocus, play } = useSession();
+  const { startSession } = useSession();
   const navigate = useNavigate();
   const [mode, setLocalMode] = useState('dry');     // 'dry' | 'live'
   const [focus, setLocalFocus] = useState('shot');  // 'shot' | 'skill'
   if (!open) return null;
 
-  const startSession = () => {
-    setMode(mode); setFocus(focus); play();
-    onClose(); navigate('/shoot');
+  const begin = () => {
+    startSession(mode, focus);   // enter full-screen activity mode
+    onClose(); navigate('/session');
   };
   const go = (path) => { onClose(); navigate(path); };
 
@@ -33,7 +33,7 @@ export default function QuickStartSheet({ open, onClose }) {
             <button className={focus === 'shot' ? '' : 'secondary'} onClick={() => setLocalFocus('shot')}>Shot Calling</button>
             <button className={focus === 'skill' ? '' : 'secondary'} onClick={() => setLocalFocus('skill')}>Skill Focus</button>
           </div>
-          <button className="sheet-go" onClick={startSession}>Start session</button>
+          <button className="sheet-go" onClick={begin}>Start session</button>
         </div>
 
         <button className="sheet-link" onClick={() => go('/gym')}><IconDumbbell size={18} /> Today's workout</button>

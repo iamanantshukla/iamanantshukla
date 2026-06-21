@@ -17,6 +17,7 @@ export function SessionProvider({ children }) {
   const [skillFocus, setSkillFocus] = useState([]); // [{skillId,name,cells:[]}]
   const [finishRequested, setFinishRequested] = useState(false);
   const [liveNotes, setLiveNotes] = useState([]);
+  const [sessionActive, setSessionActive] = useState(false); // full-screen activity mode
   const timer = useRef(null);
 
   useEffect(() => {
@@ -29,6 +30,14 @@ export function SessionProvider({ children }) {
   const play = useCallback(() => setRunning(true), []);
   const pause = useCallback(() => setRunning(false), []);
   const stop = useCallback(() => { setRunning(false); setFinishRequested(true); }, []);
+
+  // Begin a fresh full-screen session with the chosen mode/focus.
+  const startSession = useCallback((nextMode = 'dry', nextFocus = 'shot') => {
+    setSeries([emptySeries(0)]); setCurrentSeries(0); setArmedActual(null);
+    setSkillFocus([]); setLiveNotes([]); setSeconds(0); setFinishRequested(false);
+    setMode(nextMode); setFocus(nextFocus);
+    setSessionActive(true); setRunning(true);
+  }, []);
 
   // Add a CALL shot at mm-coords to the current series (max 10 -> ignored).
   const logCall = useCallback((mm) => {
@@ -73,7 +82,7 @@ export function SessionProvider({ children }) {
   const reset = useCallback(() => {
     setSeries([emptySeries(0)]); setCurrentSeries(0); setArmedActual(null);
     setSkillFocus([]); setSeconds(0); setRunning(false); setFinishRequested(false);
-    setLiveNotes([]);
+    setLiveNotes([]); setSessionActive(false);
   }, []);
 
   const value = {
@@ -83,6 +92,7 @@ export function SessionProvider({ children }) {
     skillFocus, setSkillFocus, reset,
     finishRequested, setFinishRequested,
     liveNotes, addLiveNote,
+    sessionActive, startSession,
   };
   return <SessionCtx.Provider value={value}>{children}</SessionCtx.Provider>;
 }

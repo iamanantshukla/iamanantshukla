@@ -1,28 +1,29 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
-import { IconRun, IconDumbbell, IconMoon, IconTarget } from '../components/Icons.jsx';
+import WeekStrip from '../components/WeekStrip.jsx';
+import { localDateString, mondayOf } from '../lib/gymDates.js';
 
 // Clean regex-based markdown-to-html renderer
 function renderMarkdown(md) {
   if (!md) return '';
-  
+
   // Escape HTML tags to prevent custom injected scripts
   let html = md
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-  
+
   // Replace headers
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
   html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-  
+
   // Replace bold
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  
+
   // Replace inline code
   html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-  
+
   // Replace blockquotes
   html = html.replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>');
 
@@ -53,23 +54,23 @@ function renderMarkdown(md) {
   if (inList) {
     processedLines.push('</ul>');
   }
-  
+
   html = processedLines.join('\n');
-  
+
   // Wrap paragraphs
   html = html.split('\n').map(line => {
     if (line.trim() === '') return '';
     if (line.startsWith('<h') || line.startsWith('<ul') || line.startsWith('<li') || line.startsWith('</ul') || line.startsWith('<block') || line.startsWith('</block')) return line;
     return `<p>${line}</p>`;
   }).join('\n');
-  
+
   return html;
 }
 
 function ProgressTracker({ progress }) {
   if (!progress) return null;
   const { progress: percent, step } = progress;
-  
+
   const steps = [
     { label: 'Read Inputs', val: 10 },
     { label: 'Traverse Graph', val: 30 },
@@ -77,15 +78,15 @@ function ProgressTracker({ progress }) {
     { label: 'Find Drills', val: 75 },
     { label: 'Finalize', val: 90 }
   ];
-  
+
   return (
     <div className="progress-tracker">
       <p className="progress-step-text">{step}</p>
-      
+
       <div className="progress-bar-container">
         <div className="progress-line-bg"></div>
         <div className="progress-line-fill" style={{ width: `${(percent / 90) * 100}%` }}></div>
-        
+
         <div className="progress-steps">
           {steps.map((s, idx) => {
             const isCompleted = percent > s.val;
@@ -101,29 +102,28 @@ function ProgressTracker({ progress }) {
           })}
         </div>
       </div>
-      
+
       <div className="progress-percentage">{percent}% Complete</div>
     </div>
   );
 }
 
-function getLocalDateString(d) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
+// Monday of the week containing a 'YYYY-MM-DD' string, as a 'YYYY-MM-DD' string.
+// Uses the timezone-safe mondayOf from gymDates (same logic as WeekStrip) so the
+// week is correct in every timezone, not just IST.
 function getMonday(dateStr) {
-  const d = new Date(dateStr);
-  const day = d.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d.setDate(diff));
-  return monday.toISOString().split('T')[0];
+  return localDateString(mondayOf(new Date(dateStr + 'T00:00:00')));
 }
 
-export default function ReviewsView({ hideDashboard = false }) {
-  const [dateObj, setDateObj] = useState(new Date());
+// Add a number of days to a 'YYYY-MM-DD' string and return a 'YYYY-MM-DD' string.
+function addDays(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return localDateString(d);
+}
+
+export default function ReviewsView() {
+  const [selected, setSelected] = useState(() => localDateString(new Date()));
 
   // Resolve the most recent date with training sessions on mount
   useEffect(() => {
@@ -134,8 +134,7 @@ export default function ReviewsView({ hideDashboard = false }) {
         if (sessions && sessions.length > 0 && active) {
           // Sessions are ordered by date DESC
           const mostRecentDateStr = sessions[0].started_at.split('T')[0];
-          const [y, m, d] = mostRecentDateStr.split('-').map(Number);
-          setDateObj(new Date(y, m - 1, d));
+          setSelected(mostRecentDateStr);
         }
       } catch (err) {
         console.error('Failed to resolve most recent training date:', err);
@@ -144,45 +143,30 @@ export default function ReviewsView({ hideDashboard = false }) {
     initDate();
     return () => { active = false; };
   }, []);
-  const [stats, setStats] = useState(null);
+
   const [dailyReview, setDailyReview] = useState({ review: '', status: 'none', progress: null });
   const [weeklyReview, setWeeklyReview] = useState({ review: '', status: 'none', progress: null });
   const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'weekly'
-  const [loadingStats, setLoadingStats] = useState(true);
   const [triggeringDaily, setTriggeringDaily] = useState(false);
   const [triggeringWeekly, setTriggeringWeekly] = useState(false);
-  
-  const dateStr = getLocalDateString(dateObj);
-  const mondayStr = getMonday(dateStr);
 
-  // Load Dashboard stats
-  useEffect(() => {
-    let active = true;
-    setLoadingStats(true);
-    async function loadData() {
-      try {
-        const statsRes = await api.getStats(dateStr);
-        if (active) setStats(statsRes);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        if (active) setLoadingStats(false);
-      }
-    }
-    loadData();
-    return () => { active = false; };
-  }, [dateStr]);
+  const mondayStr = getMonday(selected);
+  // Sunday is the last day of the Monday-anchored week.
+  const sundayStr = addDays(mondayStr, 6);
+  const todayStr = localDateString(new Date());
+  // The week has ended once today is on or after that week's Sunday.
+  const weekEnded = todayStr >= sundayStr;
 
   // Daily Review status fetching and polling
   useEffect(() => {
     let active = true;
     let timer;
-    
+
     async function fetchDaily() {
       try {
-        const res = await api.getDailyReview(dateStr);
+        const res = await api.getDailyReview(selected);
         if (!active) return;
-        
+
         let parsedProgress = null;
         if (res.ai_review_progress) {
           try {
@@ -191,13 +175,13 @@ export default function ReviewsView({ hideDashboard = false }) {
             console.error('Failed to parse progress JSON:', e);
           }
         }
-        
-        setDailyReview({ 
-          review: res.ai_review || '', 
+
+        setDailyReview({
+          review: res.ai_review || '',
           status: res.ai_review_status || 'none',
           progress: parsedProgress
         });
-        
+
         // Poll every 3 seconds if pending or processing
         if (res.ai_review_status === 'pending' || res.ai_review_status === 'processing') {
           timer = setTimeout(fetchDaily, 3000);
@@ -206,25 +190,25 @@ export default function ReviewsView({ hideDashboard = false }) {
         console.error(err);
       }
     }
-    
+
     fetchDaily();
-    
+
     return () => {
       active = false;
       if (timer) clearTimeout(timer);
     };
-  }, [dateStr, activeTab]);
+  }, [selected, activeTab]);
 
   // Weekly Review status fetching and polling
   useEffect(() => {
     let active = true;
     let timer;
-    
+
     async function fetchWeekly() {
       try {
         const res = await api.getWeeklyReview(mondayStr);
         if (!active) return;
-        
+
         let parsedProgress = null;
         if (res.progress) {
           try {
@@ -233,13 +217,13 @@ export default function ReviewsView({ hideDashboard = false }) {
             console.error('Failed to parse progress JSON:', e);
           }
         }
-        
-        setWeeklyReview({ 
-          review: res.review || '', 
+
+        setWeeklyReview({
+          review: res.review || '',
           status: res.status || 'none',
           progress: parsedProgress
         });
-        
+
         // Poll every 3 seconds if pending or processing
         if (res.status === 'pending' || res.status === 'processing') {
           timer = setTimeout(fetchWeekly, 3000);
@@ -248,25 +232,19 @@ export default function ReviewsView({ hideDashboard = false }) {
         console.error(err);
       }
     }
-    
+
     fetchWeekly();
-    
+
     return () => {
       active = false;
       if (timer) clearTimeout(timer);
     };
   }, [mondayStr, activeTab]);
 
-  function shiftDay(days) {
-    const d = new Date(dateObj);
-    d.setDate(d.getDate() + days);
-    setDateObj(d);
-  }
-
   async function triggerDaily() {
     setTriggeringDaily(true);
     try {
-      const res = await api.triggerDailyReview(dateStr);
+      const res = await api.triggerDailyReview(selected);
       setDailyReview({ review: '', status: res.status || 'pending', progress: null });
     } catch (err) {
       console.error(err);
@@ -288,155 +266,54 @@ export default function ReviewsView({ hideDashboard = false }) {
   }
 
   // Calculate Saturday date for weekly label
-  const monDate = new Date(mondayStr);
-  const satDate = new Date(monDate);
-  satDate.setDate(monDate.getDate() + 5);
-  const satStr = satDate.toISOString().split('T')[0];
+  const satStr = addDays(mondayStr, 5);
 
   return (
     <div className="reviews-view">
-      {/* Date Navigation Bar */}
-      <div className="subtabs" style={{ marginBottom: '24px' }}>
-        <button onClick={() => shiftDay(-1)}>← Previous</button>
-        <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{dateObj.toLocaleDateString()}</span>
-        <button onClick={() => shiftDay(1)}>Next →</button>
-        <button onClick={() => setDateObj(new Date())} style={{ marginLeft: '16px' }}>Today</button>
-      </div>
-
-      {!hideDashboard && (
-        <>
-          <h2 style={{ marginBottom: '16px' }}>Performance Dashboard</h2>
-
-          {loadingStats ? (
-            <div className="loading" style={{ height: '140px' }}>Loading Dashboard Stats…</div>
-          ) : (
-            <div className="stats-dashboard-grid">
-              {/* Running Card */}
-              <div className="card dashboard-card">
-                <div className="card-header-icon"><IconRun size={16} /> Running</div>
-                <div className="dashboard-stat-row">
-                  <div className="stat-col">
-                    <span className="stat-period">Day</span>
-                    <span className="stat-val">{stats?.day.running.kms || 0} km</span>
-                    <span className="stat-sub">{stats?.day.running.sessions ? '1 run' : 'No runs'}</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Week</span>
-                    <span className="stat-val">{stats?.week.running.kms || 0} km</span>
-                    <span className="stat-sub">{stats?.week.running.sessions} runs</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Month</span>
-                    <span className="stat-val">{stats?.month.running.kms || 0} km</span>
-                    <span className="stat-sub">{stats?.month.running.sessions} runs</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Gym Card */}
-              <div className="card dashboard-card">
-                <div className="card-header-icon"><IconDumbbell size={16} /> Gym</div>
-                <div className="dashboard-stat-row">
-                  <div className="stat-col">
-                    <span className="stat-period">Day</span>
-                    <span className="stat-val">{stats?.day.gym.sessions ? 'Active' : 'Rest'}</span>
-                    <span className="stat-sub truncate" title={stats?.day.gym.muscles}>{stats?.day.gym.muscles || 'None'}</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Week</span>
-                    <span className="stat-val">{stats?.week.gym.sessions} sessions</span>
-                    <span className="stat-sub truncate" title={stats?.week.gym.muscles}>{stats?.week.gym.muscles || 'None'}</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Month</span>
-                    <span className="stat-val">{stats?.month.gym.sessions} sessions</span>
-                    <span className="stat-sub truncate" title={stats?.month.gym.muscles}>{stats?.month.gym.muscles || 'None'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sleep Card */}
-              <div className="card dashboard-card">
-                <div className="card-header-icon"><IconMoon size={16} /> Sleep</div>
-                <div className="dashboard-stat-row">
-                  <div className="stat-col">
-                    <span className="stat-period">Day</span>
-                    <span className="stat-val">{stats?.day.sleep.avgHours || 0} hrs</span>
-                    <span className="stat-sub">Sleep duration</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Week</span>
-                    <span className="stat-val">{stats?.week.sleep.avgHours || 0} hrs</span>
-                    <span className="stat-sub">Average sleep</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Month</span>
-                    <span className="stat-val">{stats?.month.sleep.avgHours || 0} hrs</span>
-                    <span className="stat-sub">Average sleep</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Shooting Card */}
-              <div className="card dashboard-card">
-                <div className="card-header-icon"><IconTarget size={16} /> Shooting</div>
-                <div className="dashboard-stat-row">
-                  <div className="stat-col">
-                    <span className="stat-period">Day</span>
-                    <span className="stat-val">{stats?.day.sessions.totalHours || 0} hrs</span>
-                    <span className="stat-sub">{stats?.day.sessions.totalShots || 0} shots</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Week</span>
-                    <span className="stat-val">{stats?.week.sessions.totalHours || 0} hrs</span>
-                    <span className="stat-sub">{stats?.week.sessions.totalShots || 0} shots</span>
-                  </div>
-                  <div className="stat-col">
-                    <span className="stat-period">Month</span>
-                    <span className="stat-val">{stats?.month.sessions.totalHours || 0} hrs</span>
-                    <span className="stat-sub">{stats?.month.sessions.totalShots || 0} shots</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      {/* Home-style day scroll */}
+      <WeekStrip
+        anchor={new Date(selected + 'T00:00:00')}
+        selected={selected}
+        onSelect={setSelected}
+        dots={{}}
+      />
 
       {/* AI Review Tabbed Area */}
       <div className="reviews-section card" style={{ marginTop: '24px' }}>
         <div className="reviews-header">
           <div className="reviews-tabs">
-            <button 
+            <button
               className={`tab-btn ${activeTab === 'daily' ? 'active' : ''}`}
               onClick={() => setActiveTab('daily')}
             >
               Daily AI Review
             </button>
-            <button 
+            <button
               className={`tab-btn ${activeTab === 'weekly' ? 'active' : ''}`}
               onClick={() => setActiveTab('weekly')}
             >
               Weekly AI Trend Review
             </button>
           </div>
-          
+
           {activeTab === 'daily' ? (
-            <button 
-              className="secondary" 
-              onClick={triggerDaily} 
+            <button
+              className="secondary"
+              onClick={triggerDaily}
               disabled={triggeringDaily || dailyReview.status === 'processing'}
             >
               {dailyReview.status === 'completed' ? 'Re-run Daily Review' : 'Trigger Daily Review'}
             </button>
           ) : (
-            <button 
-              className="secondary" 
-              onClick={triggerWeekly} 
-              disabled={triggeringWeekly || weeklyReview.status === 'processing'}
-            >
-              {weeklyReview.status === 'completed' ? 'Re-run Weekly Review' : 'Trigger Weekly Review'}
-            </button>
+            weekEnded && (
+              <button
+                className="secondary"
+                onClick={triggerWeekly}
+                disabled={triggeringWeekly || weeklyReview.status === 'processing'}
+              >
+                {weeklyReview.status === 'completed' ? 'Re-run Weekly Review' : 'Trigger Weekly Review'}
+              </button>
+            )
           )}
         </div>
 
@@ -453,7 +330,7 @@ export default function ReviewsView({ hideDashboard = false }) {
                   {dailyReview.status === 'failed' && 'Failed'}
                 </span>
               </div>
-              
+
               {dailyReview.status === 'processing' || dailyReview.status === 'pending' ? (
                 dailyReview.progress ? (
                   <ProgressTracker progress={dailyReview.progress} />
@@ -469,8 +346,8 @@ export default function ReviewsView({ hideDashboard = false }) {
                   <p>Please click the trigger button to try again.</p>
                 </div>
               ) : dailyReview.status === 'completed' ? (
-                <div 
-                  className="markdown-body" 
+                <div
+                  className="markdown-body"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(dailyReview.review) }}
                 />
               ) : (
@@ -483,16 +360,22 @@ export default function ReviewsView({ hideDashboard = false }) {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 style={{ margin: 0 }}>Weekly Trend & Causal Analysis ({mondayStr} to {satStr})</h3>
-                <span className={`status-badge ${weeklyReview.status}`}>
-                  {weeklyReview.status === 'none' && 'No Review'}
-                  {weeklyReview.status === 'pending' && 'Pending...'}
-                  {weeklyReview.status === 'processing' && 'Processing...'}
-                  {weeklyReview.status === 'completed' && 'Completed'}
-                  {weeklyReview.status === 'failed' && 'Failed'}
-                </span>
+                {weekEnded && (
+                  <span className={`status-badge ${weeklyReview.status}`}>
+                    {weeklyReview.status === 'none' && 'No Review'}
+                    {weeklyReview.status === 'pending' && 'Pending...'}
+                    {weeklyReview.status === 'processing' && 'Processing...'}
+                    {weeklyReview.status === 'completed' && 'Completed'}
+                    {weeklyReview.status === 'failed' && 'Failed'}
+                  </span>
+                )}
               </div>
-              
-              {weeklyReview.status === 'processing' || weeklyReview.status === 'pending' ? (
+
+              {!weekEnded ? (
+                <div className="empty-state">
+                  <p>Weekly Trend will be generated on Sunday.</p>
+                </div>
+              ) : weeklyReview.status === 'processing' || weeklyReview.status === 'pending' ? (
                 weeklyReview.progress ? (
                   <ProgressTracker progress={weeklyReview.progress} />
                 ) : (
@@ -507,8 +390,8 @@ export default function ReviewsView({ hideDashboard = false }) {
                   <p>Please click the trigger button to try again.</p>
                 </div>
               ) : weeklyReview.status === 'completed' ? (
-                <div 
-                  className="markdown-body" 
+                <div
+                  className="markdown-body"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(weeklyReview.review) }}
                 />
               ) : (

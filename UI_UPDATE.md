@@ -22,9 +22,15 @@ This file tracks what the Pebble redesign changed and what's still pending (plac
 - Exercise order within a day is reorderable and persisted (`gymApi.getOrder/setOrder`).
 - `GymHistory.jsx` (past workouts), `GymProgress.jsx` (per-exercise last vs best).
 
-**Shoot** (`src/views/Shoot.jsx`) — hub with sub-tabs: Session (the preserved shot-calling + skill-focus active session), Feed, Skills, Reviews. Mode (dry/live) and Focus (shot/skill) remain independent.
+**Shoot** (`src/views/Shoot.jsx`) — hub with sub-tabs: **Today** (today's training plan via `TrainingPlanView`), **Feed**, **Skills**, **Reviews**, plus a **"Start new session"** button. The live logging session is no longer a tab — it opens full-screen (see below). Mode (dry/live) and Focus (shot/skill) remain independent.
 
-**Shooting flow** — the Home "Shooting training" row opens today's **shooting training plan** (`/plan`, `TrainingPlanView` — the existing weekly plan with modules + challenges) first; its "Start Timer & Log Session" button then enters the Shoot logging tab (`/shoot`). The center quick-start sheet still starts a session directly for speed. Note: `TrainingPlanView` is still a static mock (hardcoded days/modules) — making it a real per-day shooting plan is pending (see below).
+**Full-screen session (activity mode)** — the actual shot-calling / skill-focus logging session now runs full-screen at `/session` (Strava-style): the nav bar is hidden and you can only leave via **End Session** (→ summary → save) or **Discard** (with confirm). Reached from the Pebble center button (QuickStartSheet) and the Shoot tab's "Start new session". State is driven by `SessionContext.startSession()` / `sessionActive`; the in-session header has the live timer + pause/resume; ending the session pauses the timer so the saved duration is accurate. (The old pinned RunningSessionBar was removed — the session is always full-screen.)
+
+**Shooting training flow** — the Home "Shooting training" row opens today's **shooting training plan** (`/plan`, `TrainingPlanView` — also shown as the Shoot ▸ Today tab). Its "Start Timer & Log Session" button enters the full-screen session. Note: `TrainingPlanView` is still a static mock (hardcoded days/modules) — making it a real per-day shooting plan is pending (see below).
+
+**Reviews** (`src/views/ReviewsView.jsx`) — revamped: removed the big Performance Dashboard; now a home-style **WeekStrip day scroll** + **daily/weekly switch**. Selecting a day updates that day's review. The weekly tab shows "Weekly Trend will be generated on Sunday." until the week (Mon–Sun, containing the selected day) has ended; week math is timezone-safe (reuses `gymDates.mondayOf`).
+
+**Branding** — favicon + apple-touch-icon are the Pebble mark (`public/pebble.svg`); page title is "Pebble · Training Journal". All dates come from the browser (`new Date()`), nothing hardcoded.
 
 **Shooting session preservation & notes**
 - Shot-calling target, skill-focus grid, series nav, pause/resume timer all preserved.
