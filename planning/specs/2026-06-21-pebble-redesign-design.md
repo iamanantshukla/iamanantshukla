@@ -201,7 +201,7 @@ workout = {
 `src/lib/scoring.js` re-exports from `../../../shared/scoring.js`, which does **not** resolve inside this repo (the real file lives in a sibling workspace `workspace-shooting-log/shared/scoring.js`). Standalone `npm run build` / `npm test` will fail to resolve it. The redesign must make scoring self-contained — **vendor a local `src/lib/scoring.js`** (copy the ~60-line ISSF implementation in) so the app builds on its own. (Behavior must match the existing module: `scoreFromDistance`, `directionFromVector`, `scoreFromMm`, 10-ring 5.75mm, 8mm step, 2.25mm pellet radius, 8-octant directions.)
 
 ### Build output caveat
-`vite.config.js` sets `outDir: 'docs'` with `emptyOutDir`. This spec lives under `docs/superpowers/specs/` and is committed to git, so a build won't lose it from history — but a local `npm run build` would wipe the working copy. During implementation, consider moving the spec out of `docs/` or excluding it; not a blocker.
+`vite.config.js` sets `outDir: docs` with `emptyOutDir`, so every build wipes `docs/`. Planning docs (this spec + the plan) therefore live under top-level `planning/`, never under `docs/`.
 
 ---
 

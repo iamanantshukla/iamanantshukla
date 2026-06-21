@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 18.3, react-router-dom 6.22, Vite 5.4, Vitest 2.1 + @testing-library/react + jsdom. Plain CSS (`src/styles.css`, CSS variables). No new dependencies.
 
-**Spec:** `docs/superpowers/specs/2026-06-21-pebble-redesign-design.md`
+**Spec:** `planning/specs/2026-06-21-pebble-redesign-design.md`
 
 ---
 
@@ -2059,7 +2059,7 @@ git commit -m "feat: reorder exercises within a gym day (persisted)"
 - **Auto-fill journal gym summary from logged workout** — wired minimally; expand to populate `gym_muscles` from the day's target.
 
 ## Notes
-- `vite.config.js` builds into `docs/` with `emptyOutDir`. Specs/plans live under `docs/superpowers/` and are committed; a local build wipes the working copy of `docs/` but git history retains them. Consider relocating docs if this becomes annoying.
+- `vite.config.js` builds into `docs/` with `emptyOutDir`, which wipes anything under `docs/` on every build. Planning docs were therefore relocated to top-level `planning/` (specs + plans) so builds never destroy them. Do NOT put working docs under `docs/`.
 ```
 
 - [ ] **Step 2: Commit**
