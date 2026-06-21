@@ -1,6 +1,6 @@
 // Placeholder configuration - User needs to fill these in
 const CONFIG = {
-    CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE', // e.g., '123456789-abc.apps.googleusercontent.com'
+    CLIENT_ID: '235655418368-kqfijrs3pkiugp1ji5brr727jkfqqh77.apps.googleusercontent.com', // e.g., '123456789-abc.apps.googleusercontent.com'
     DRIVE_FILE_ID: '10T_qKiCLiS8EAUW4zYDOidJV45K6BtQM',
     SCOPES: 'https://www.googleapis.com/auth/drive.file'
 };
