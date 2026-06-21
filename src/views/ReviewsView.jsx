@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import { IconRun, IconDumbbell, IconMoon, IconTarget } from '../components/Icons.jsx';
 
 // Clean regex-based markdown-to-html renderer
 function renderMarkdown(md) {
@@ -132,7 +133,7 @@ export default function ReviewsView({ hideDashboard = false }) {
         const sessions = await api.listSessions();
         if (sessions && sessions.length > 0 && active) {
           // Sessions are ordered by date DESC
-          const mostRecentDateStr = sessions[0].date.split('T')[0];
+          const mostRecentDateStr = sessions[0].started_at.split('T')[0];
           const [y, m, d] = mostRecentDateStr.split('-').map(Number);
           setDateObj(new Date(y, m - 1, d));
         }
@@ -312,7 +313,7 @@ export default function ReviewsView({ hideDashboard = false }) {
             <div className="stats-dashboard-grid">
               {/* Running Card */}
               <div className="card dashboard-card">
-                <div className="card-header-icon">🏃 Running</div>
+                <div className="card-header-icon"><IconRun size={16} /> Running</div>
                 <div className="dashboard-stat-row">
                   <div className="stat-col">
                     <span className="stat-period">Day</span>
@@ -334,7 +335,7 @@ export default function ReviewsView({ hideDashboard = false }) {
 
               {/* Gym Card */}
               <div className="card dashboard-card">
-                <div className="card-header-icon">🏋️ Gym</div>
+                <div className="card-header-icon"><IconDumbbell size={16} /> Gym</div>
                 <div className="dashboard-stat-row">
                   <div className="stat-col">
                     <span className="stat-period">Day</span>
@@ -356,7 +357,7 @@ export default function ReviewsView({ hideDashboard = false }) {
 
               {/* Sleep Card */}
               <div className="card dashboard-card">
-                <div className="card-header-icon">😴 Sleep</div>
+                <div className="card-header-icon"><IconMoon size={16} /> Sleep</div>
                 <div className="dashboard-stat-row">
                   <div className="stat-col">
                     <span className="stat-period">Day</span>
@@ -378,7 +379,7 @@ export default function ReviewsView({ hideDashboard = false }) {
 
               {/* Shooting Card */}
               <div className="card dashboard-card">
-                <div className="card-header-icon">🎯 Shooting</div>
+                <div className="card-header-icon"><IconTarget size={16} /> Shooting</div>
                 <div className="dashboard-stat-row">
                   <div className="stat-col">
                     <span className="stat-period">Day</span>

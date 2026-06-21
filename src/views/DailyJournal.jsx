@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '../lib/api.js';
 import WeekStrip from '../components/WeekStrip.jsx';
-import { localDateString } from '../lib/gymDates.js';
+import { localDateString, weekDays } from '../lib/gymDates.js';
+import { getPlanForDate } from '../lib/gymPlan.js';
+import { gymApi } from '../lib/gymApi.js';
+import { IconRun, IconDumbbell, IconMoon, IconPencil } from '../components/Icons.jsx';
 
 function getLocalDateString(d) {
   const year = d.getFullYear();
@@ -27,6 +30,18 @@ export default function DailyJournal() {
 
   const dateStr = getLocalDateString(dateObj);
 
+  // Per-day dots for the week of the selected day: 'done' if a workout was logged
+  // that day, else 'plan' if a workout is scheduled (non-rest day), else 'none'.
+  const dots = useMemo(() => {
+    const result = {};
+    for (const d of weekDays(new Date(dateStr + 'T00:00:00'))) {
+      const ds = localDateString(d);
+      if (gymApi.getWorkoutForDate(ds)) result[ds] = 'done';
+      else if (getPlanForDate(ds).dayKey !== 'rest') result[ds] = 'plan';
+    }
+    return result;
+  }, [dateStr, gymApi.listWorkouts().length]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -36,11 +51,18 @@ export default function DailyJournal() {
           api.getJournal(dateStr),
           api.listSessions(dateStr)
         ]);
+        const loadedGym = jRes.gym === 1;
+        const loadedGymMuscles = jRes.gym_muscles || '';
+        // Auto-fill the gym summary from a logged workout (spec §7) so the day reads
+        // as "complete" without re-typing. Only pre-fills in-memory form state when the
+        // journal has no gym data yet; does not overwrite saved gym_muscles or auto-save.
+        const workout = gymApi.getWorkoutForDate(dateStr);
+        const prefillGym = workout && !loadedGym && !loadedGymMuscles;
         setJournal({
           running: jRes.running === 1,
           running_kms: jRes.running_kms || '',
-          gym: jRes.gym === 1,
-          gym_muscles: jRes.gym_muscles || '',
+          gym: prefillGym ? true : loadedGym,
+          gym_muscles: prefillGym ? (workout.dayTitle || '') : loadedGymMuscles,
           sleeping_hours: jRes.sleeping_hours || '',
           observation: jRes.observation || ''
         });
@@ -79,7 +101,7 @@ export default function DailyJournal() {
         anchor={dateObj}
         selected={dateStr}
         onSelect={(ds) => setDateObj(new Date(ds + 'T00:00:00'))}
-        dots={{}}
+        dots={dots}
       />
 
       <div className="journal-layout">
@@ -150,7 +172,7 @@ export default function DailyJournal() {
                     checked={journal.running}
                     onChange={(e) => setJournal({ ...journal, running: e.target.checked })}
                   />
-                  Running
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><IconRun size={16} /> Running</span>
                 </label>
                 {journal.running && (
                   <input
@@ -170,7 +192,7 @@ export default function DailyJournal() {
                     checked={journal.gym}
                     onChange={(e) => setJournal({ ...journal, gym: e.target.checked })}
                   />
-                  Gym
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><IconDumbbell size={16} /> Gym</span>
                 </label>
                 {journal.gym && (
                   <input
@@ -184,7 +206,7 @@ export default function DailyJournal() {
               </div>
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px' }}>Total Sleeping hours (hh:mm or text)</label>
+                <label style={{ display: 'block', marginBottom: '8px' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><IconMoon size={16} /> Total Sleeping hours (hh:mm or text)</span></label>
                 <input
                   type="text"
                   placeholder="e.g. 7 hours 30 mins"
@@ -195,7 +217,7 @@ export default function DailyJournal() {
               </div>
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px' }}>Observation</label>
+                <label style={{ display: 'block', marginBottom: '8px' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><IconPencil size={16} /> Observation</span></label>
                 <textarea
                   placeholder="Reflections on the day..."
                   value={journal.observation}

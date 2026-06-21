@@ -1,11 +1,11 @@
 // src/views/Home.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { gymApi } from '../lib/gymApi.js';
 import { getPlanForDate } from '../lib/gymPlan.js';
 import { getPebbleVoice, FALLBACK_VOICE } from '../lib/pebbleVoice.js';
-import { localDateString } from '../lib/gymDates.js';
+import { localDateString, weekDays } from '../lib/gymDates.js';
 import Pebble from '../components/Pebble.jsx';
 import WeekStrip from '../components/WeekStrip.jsx';
 import { IconDumbbell, IconTarget, IconNotebook, IconChevronRight } from '../components/Icons.jsx';
@@ -16,17 +16,93 @@ export default function Home() {
   const [selected, setSelected] = useState(today);
   const [voice, setVoice] = useState(FALLBACK_VOICE);
   const [stats, setStats] = useState(null);
+  const [dayJournal, setDayJournal] = useState(null);
+  const [daySessions, setDaySessions] = useState([]);
+  const [lastSession, setLastSession] = useState(null);
 
   useEffect(() => { getPebbleVoice().then(setVoice); }, []);
   useEffect(() => { api.getStats(selected).then(setStats).catch(() => {}); }, [selected]);
 
+  // Load the selected day's journal + shooting sessions, plus the most recent
+  // past session (across all dates) for a "last avg" hint. Robust to async +
+  // missing data: any failure leaves the safe defaults in place.
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([api.getJournal(selected), api.listSessions(selected)])
+      .then(([journal, sessions]) => {
+        if (cancelled) return;
+        setDayJournal(journal);
+        setDaySessions(Array.isArray(sessions) ? sessions : []);
+      })
+      .catch(() => { /* keep defaults */ });
+    api.listSessions('')
+      .then((all) => {
+        if (cancelled) return;
+        const list = Array.isArray(all) ? all : [];
+        // listSessions('') is sorted newest-first; pick the newest with shots.
+        const recent = list.find((s) => (s.total_shots || (s.shots ? s.shots.length : 0)) > 0) || null;
+        setLastSession(recent);
+      })
+      .catch(() => { /* keep defaults */ });
+    return () => { cancelled = true; };
+  }, [selected]);
+
   const plan = getPlanForDate(selected);
+
+  // Per-day dots for the week of `selected`: 'done' if a workout was logged that
+  // day, else 'plan' if a workout is scheduled (non-rest day), else 'none'.
+  const dots = useMemo(() => {
+    const result = {};
+    for (const d of weekDays(new Date(selected + 'T00:00:00'))) {
+      const ds = localDateString(d);
+      if (gymApi.getWorkoutForDate(ds)) result[ds] = 'done';
+      else if (getPlanForDate(ds).dayKey !== 'rest') result[ds] = 'plan';
+    }
+    return result;
+  }, [selected, gymApi.listWorkouts().length]);
+
   const isFuture = selected > today;
   const greeting = selected === today ? 'Today' : (isFuture ? 'Looking ahead' : 'Past day');
   const week = stats?.week;
   const gymDays = Math.min(5, week?.gym?.sessions || 0); // capped at 5/week
 
   const agendaTitle = plan.dayKey === 'rest' ? 'Rest day — recover' : plan.title;
+
+  // ── Data-driven agenda subtext ──────────────────────────────────────────
+  const isRest = plan.dayKey === 'rest';
+  const loggedWorkout = gymApi.getWorkoutForDate(selected);
+  const gymDone = !!loggedWorkout;
+
+  // Gym row subtext: future days read as planned; past/today prefer logged state.
+  let gymSub;
+  if (isFuture) {
+    gymSub = isRest ? 'Rest day — recover' : `Planned: ${plan.title}`;
+  } else if (gymDone) {
+    const n = (loggedWorkout.exercises || []).length;
+    gymSub = n ? `${n} exercises · logged` : 'Logged';
+  } else if (isRest) {
+    gymSub = 'No workout today';
+  } else {
+    gymSub = plan.exercises.length ? `${plan.exercises.length} exercises` : 'No workout today';
+  }
+
+  // Shooting row subtext: sessions logged for the selected day, else a hint.
+  // The row opens today's shooting training plan (you start the session from there).
+  const shootCount = daySessions.length;
+  let shootSub;
+  if (shootCount > 0) {
+    shootSub = `${shootCount} session${shootCount === 1 ? '' : 's'} logged · view plan`;
+  } else if (lastSession) {
+    const lastShots = lastSession.total_shots || (lastSession.shots ? lastSession.shots.length : 0);
+    shootSub = lastShots ? `Last: ${lastShots} shots · view today's plan` : "View today's plan";
+  } else {
+    shootSub = "View today's plan";
+  }
+
+  // Journal row subtext: logged if any meaningful field is present.
+  const journalLogged = !!(dayJournal && (dayJournal.gym || dayJournal.running ||
+    dayJournal.sleeping_hours || dayJournal.observation));
+  const journalSub = journalLogged ? 'Logged' : 'Not logged yet';
 
   return (
     <div className="home">
@@ -38,7 +114,7 @@ export default function Home() {
         </div>
       </header>
 
-      <WeekStrip anchor={new Date(selected + 'T00:00:00')} selected={selected} onSelect={setSelected} dots={{}} />
+      <WeekStrip anchor={new Date(selected + 'T00:00:00')} selected={selected} onSelect={setSelected} dots={dots} />
 
       <div className="says-card">
         <div className="says-tag"><Pebble size={18} variant="face" /> Pebble says</div>
@@ -48,20 +124,20 @@ export default function Home() {
       <div className="section-label">{greeting}</div>
       <button className="agenda-row" onClick={() => navigate('/gym')}>
         <span className="agenda-ic accent"><IconDumbbell size={18} /></span>
-        <span className="agenda-body"><span className="agenda-t">{agendaTitle}</span>
-          <span className="agenda-s">{plan.exercises.length ? `${plan.exercises.length} exercises` : 'No workout today'}</span></span>
+        <span className="agenda-body"><span className="agenda-t">{agendaTitle}{gymDone ? ' ✓' : ''}</span>
+          <span className="agenda-s">{gymSub}</span></span>
         <IconChevronRight size={18} className="agenda-chev" />
       </button>
-      <button className="agenda-row" onClick={() => navigate('/shoot')}>
+      <button className="agenda-row" onClick={() => navigate('/plan')}>
         <span className="agenda-ic good"><IconTarget size={18} /></span>
-        <span className="agenda-body"><span className="agenda-t">Shooting session</span>
-          <span className="agenda-s">Tap to start</span></span>
+        <span className="agenda-body"><span className="agenda-t">Shooting training{shootCount > 0 ? ' ✓' : ''}</span>
+          <span className="agenda-s">{shootSub}</span></span>
         <IconChevronRight size={18} className="agenda-chev" />
       </button>
       <button className="agenda-row" onClick={() => navigate('/journal')}>
         <span className="agenda-ic warn"><IconNotebook size={18} /></span>
-        <span className="agenda-body"><span className="agenda-t">Daily journal</span>
-          <span className="agenda-s">Sleep, run, notes</span></span>
+        <span className="agenda-body"><span className="agenda-t">Daily journal{journalLogged ? ' ✓' : ''}</span>
+          <span className="agenda-s">{journalSub}</span></span>
         <IconChevronRight size={18} className="agenda-chev" />
       </button>
 

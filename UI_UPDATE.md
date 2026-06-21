@@ -24,6 +24,8 @@ This file tracks what the Pebble redesign changed and what's still pending (plac
 
 **Shoot** (`src/views/Shoot.jsx`) — hub with sub-tabs: Session (the preserved shot-calling + skill-focus active session), Feed, Skills, Reviews. Mode (dry/live) and Focus (shot/skill) remain independent.
 
+**Shooting flow** — the Home "Shooting training" row opens today's **shooting training plan** (`/plan`, `TrainingPlanView` — the existing weekly plan with modules + challenges) first; its "Start Timer & Log Session" button then enters the Shoot logging tab (`/shoot`). The center quick-start sheet still starts a session directly for speed. Note: `TrainingPlanView` is still a static mock (hardcoded days/modules) — making it a real per-day shooting plan is pending (see below).
+
 **Shooting session preservation & notes**
 - Shot-calling target, skill-focus grid, series nav, pause/resume timer all preserved.
 - **In-session shot notes** (`SessionContext.liveNotes` / `addLiveNote`) — capture in-the-moment feelings during a session; saved on the session (`live_notes`) and shown in the summary.
@@ -46,6 +48,7 @@ This file tracks what the Pebble redesign changed and what's still pending (plac
 - **"Pebble says" Drive file id** — currently `PLACEHOLDER_PEBBLE_VOICE_FILE_ID` in `src/lib/pebbleVoice.js`. To enable dynamic home status: replace the `pebbleVoiceFileId` default with the real id, or call `setPebbleVoiceFileId('<real-id>')` after login. The Drive file should contain JSON `{ "text": "..." }`. Until set, home shows the static `FALLBACK_VOICE` line.
 - **AI generation** for daily/weekly reviews and the Pebble voice — still external/disabled in this client (display only; `api.triggerDailyReview`/`triggerWeeklyReview` remain stubbed).
 - **In-app gym plan editing** (swap exercises / edit sets-reps / add custom days) — not built; the plan is hardcoded in `src/lib/gymPlan.js`. (Reordering exercises *within* a day IS supported and persisted.)
+- **Real per-day shooting training plan** — `TrainingPlanView` (`/plan`, reached from the Home "Shooting training" row) is currently a static mock with hardcoded days/modules/challenges. A real per-weekday shooting plan (analogous to `gymPlan.js`) is pending.
 - **Gym Progress charts** — currently last-vs-best text only; richer trend charts later.
 - **Journal gym auto-summary** — finishing a workout sets the journal `gym` flag and a default `gym_muscles` (the day subtitle); could be expanded to richer per-muscle detail.
 

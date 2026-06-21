@@ -151,7 +151,7 @@ export default function SkillFocusTable() {
                         />
                       </td>
                     ))}
-                    <td><button className="secondary" onClick={() => removeRow(ri)}>✕</button></td>
+                    <td><button className="secondary" onClick={() => removeRow(ri)} aria-label="Remove row">Remove</button></td>
                   </tr>
                 );
               })}

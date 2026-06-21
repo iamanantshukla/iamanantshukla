@@ -62,7 +62,7 @@ export default function TrainingPlanView() {
         </div>
 
         <div style={{ display: 'flex', gap: '16px' }}>
-          <button className="primary" style={{ flex: 1, background: 'var(--accent)', color: '#fff', border: 'none', padding: '12px', borderRadius: '999px', fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/active')}>
+          <button className="primary" style={{ flex: 1, background: 'var(--accent)', color: '#fff', border: 'none', padding: '12px', borderRadius: '999px', fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/shoot')}>
             Start Timer & Log Session
           </button>
           <button className="secondary" style={{ flex: 1, padding: '12px', borderRadius: '999px', fontWeight: 600, cursor: 'pointer' }} onClick={() => setExpandedDay(null)}>
@@ -80,7 +80,7 @@ export default function TrainingPlanView() {
         <p style={{ color: 'var(--muted)', margin: '8px 0 0' }}>Based on your last causal analysis, we created a personalized microcycle.</p>
       </header>
 
-      <div style={{ background: 'rgba(71, 196, 77, 0.1)', border: '1px solid var(--good)', padding: '16px', borderRadius: '12px', marginBottom: '32px', color: 'var(--good)', fontWeight: 600 }}>
+      <div style={{ background: 'color-mix(in srgb, var(--good) 12%, transparent)', border: '1px solid var(--good)', padding: '16px', borderRadius: '12px', marginBottom: '32px', color: 'var(--good)', fontWeight: 600 }}>
         Great start. You completed your first session. (1/3)
       </div>
 
@@ -91,7 +91,7 @@ export default function TrainingPlanView() {
         <div style={{ background: 'var(--panel-2)', border: '1px solid var(--good)', borderRadius: '12px', padding: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
             <span style={{ fontWeight: 600 }}>Day 1</span>
-            <span style={{ fontSize: '0.8rem', background: 'rgba(252, 76, 2, 0.2)', color: 'var(--accent)', padding: '2px 8px', borderRadius: '999px' }}>Medium</span>
+            <span style={{ fontSize: '0.8rem', background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent)', padding: '2px 8px', borderRadius: '999px' }}>Medium</span>
           </div>
           <div style={{ color: 'var(--good)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '16px' }}>✓ Completed</div>
           <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>
@@ -120,7 +120,7 @@ export default function TrainingPlanView() {
         <div style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', borderRadius: '12px', padding: '20px', opacity: 0.7 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
             <span style={{ fontWeight: 600 }}>Day 3</span>
-            <span style={{ fontSize: '0.8rem', background: 'rgba(217, 41, 27, 0.2)', color: 'var(--bad)', padding: '2px 8px', borderRadius: '999px' }}>Intense</span>
+            <span style={{ fontSize: '0.8rem', background: 'color-mix(in srgb, var(--bad) 20%, transparent)', color: 'var(--bad)', padding: '2px 8px', borderRadius: '999px' }}>Intense</span>
           </div>
           <div style={{ color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '16px' }}>Not started</div>
           <ul style={{ paddingLeft: '20px', margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>

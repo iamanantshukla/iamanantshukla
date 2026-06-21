@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import { IconTarget } from './Icons.jsx';
 
 export default function PasswordGate({ onAuthed }) {
   const [busy, setBusy] = useState(false);
@@ -34,7 +35,7 @@ export default function PasswordGate({ onAuthed }) {
   return (
     <div className="gate">
       <div className="gate-card">
-        <h1>🎯 Air Pistol Journal</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><IconTarget size={22} /> Air Pistol Journal</h1>
         <p>Cloud Portal</p>
         <button className="primary" onClick={handleLogin} disabled={busy}>
           {busy ? 'Loading Data...' : 'Log in with Google'}

@@ -21,9 +21,9 @@ export default function LockGate({ owner, onLocked }) {
   return (
     <div className="gate">
       <div className="gate-card">
-        <h1>🔒 Lock Active</h1>
+        <h1>Lock Active</h1>
         <p>The <strong>{owner}</strong> UI currently has the active lock.</p>
-        <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1.5rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '1.5rem' }}>
           Taking the lock will download the latest changes from remote to synchronize this device, then lock it for your use.
         </p>
         {error && <div className="error">{error}</div>}
