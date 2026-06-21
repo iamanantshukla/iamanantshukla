@@ -17,7 +17,7 @@ export default function PasswordGate({ onAuthed }) {
     setBusy(true);
     const client = google.accounts.oauth2.initTokenClient({
       client_id: '235655418368-kqfijrs3pkiugp1ji5brr727jkfqqh77.apps.googleusercontent.com',
-      scope: 'https://www.googleapis.com/auth/drive.file',
+      scope: 'https://www.googleapis.com/auth/drive',
       callback: async (res) => {
         if (res && res.access_token) {
           await api.setAccessToken(res.access_token);
