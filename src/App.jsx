@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { api } from './lib/api.js';
 import { SessionProvider } from './context/SessionContext.jsx';
 import PasswordGate from './components/PasswordGate.jsx';
@@ -30,7 +30,7 @@ export default function App() {
   if (lockOwner !== 'hosted') return <LockGate owner={lockOwner} onLocked={() => setLockOwner('hosted')} />;
 
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <HashRouter>
       <SessionProvider>
         <NavBar onLogout={async () => { await api.logout(); setAuthed(false); }} />
         <main className="content">
@@ -49,6 +49,6 @@ export default function App() {
           </Routes>
         </main>
       </SessionProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
