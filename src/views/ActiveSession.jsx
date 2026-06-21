@@ -8,7 +8,7 @@ import SummaryModal from '../components/SummaryModal.jsx';
 
 export default function ActiveSession() {
   const s = useSession();
-  const [subtab, setSubtab] = useState('shot'); // 'shot' | 'skill'
+  const [subtab, setSubtab] = useState(s.focus || 'shot'); // 'shot' | 'skill'
   const [showSummary, setShowSummary] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
@@ -21,6 +21,12 @@ export default function ActiveSession() {
       s.setFinishRequested(false);
     }
   }, [s.finishRequested, s]);
+
+  useEffect(() => {
+    if (s.focus) {
+      setSubtab(s.focus);
+    }
+  }, [s.focus]);
 
   function onTap(mm) {
     if (s.armedActual) s.logActual(mm);

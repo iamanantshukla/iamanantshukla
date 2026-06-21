@@ -7,7 +7,8 @@ export const useSession = () => useContext(SessionCtx);
 const emptySeries = (index) => ({ index, shots: [] });
 
 export function SessionProvider({ children }) {
-  const [mode, setMode] = useState('live');
+  const [mode, setMode] = useState('dry');
+  const [focus, setFocus] = useState('shot'); // 'shot' | 'skill'
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [series, setSeries] = useState([emptySeries(0)]);
@@ -69,7 +70,7 @@ export function SessionProvider({ children }) {
   }, []);
 
   const value = {
-    mode, setMode, seconds, running, play, pause, stop,
+    mode, setMode, focus, setFocus, seconds, running, play, pause, stop,
     series, currentSeries, setCurrentSeries, ensureSeries,
     armedActual, armActual, logCall, logActual,
     skillFocus, setSkillFocus, reset,
