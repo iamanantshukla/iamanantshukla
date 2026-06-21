@@ -49,6 +49,16 @@ export const api = {
     await syncFromDrive();
   },
 
+  getLockOwner: () => {
+    return dataStore.lock ? dataStore.lock.owner : 'hosted'; // default to hosted
+  },
+
+  takeLock: async () => {
+    await syncFromDrive(); // Fetch latest
+    dataStore.lock = { owner: 'hosted', timestamp: new Date().toISOString() };
+    await syncToDrive();
+  },
+
   me: async () => {
     return { authed: !!accessToken && initialized };
   },

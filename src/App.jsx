@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { api } from './lib/api.js';
 import { SessionProvider } from './context/SessionContext.jsx';
 import PasswordGate from './components/PasswordGate.jsx';
+import LockGate from './components/LockGate.jsx';
 import NavBar from './components/NavBar.jsx';
 import ActiveSession from './views/ActiveSession.jsx';
 import OldSessions from './views/OldSessions.jsx';
@@ -15,11 +16,18 @@ import TrainingPlanView from './views/TrainingPlanView.jsx';
 
 export default function App() {
   const [authed, setAuthed] = useState(null); // null=loading
+  const [lockOwner, setLockOwner] = useState(null);
 
-  useEffect(() => { api.me().then((r) => setAuthed(r.authed)).catch(() => setAuthed(false)); }, []);
+  useEffect(() => { 
+    api.me().then((r) => {
+      setAuthed(r.authed);
+      if (r.authed) setLockOwner(api.getLockOwner());
+    }).catch(() => setAuthed(false)); 
+  }, []);
 
   if (authed === null) return <div className="loading">Loading…</div>;
-  if (!authed) return <PasswordGate onAuthed={() => setAuthed(true)} />;
+  if (!authed) return <PasswordGate onAuthed={() => { setAuthed(true); setLockOwner(api.getLockOwner()); }} />;
+  if (lockOwner !== 'hosted') return <LockGate owner={lockOwner} onLocked={() => setLockOwner('hosted')} />;
 
   return (
     <BrowserRouter>
