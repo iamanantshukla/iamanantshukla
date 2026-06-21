@@ -1,4 +1,5 @@
-let accessToken = null;
+import { getAccessToken, setAccessToken as setToken, clearAccessToken } from './auth.js';
+import { gymApi } from './gymApi.js';
 const DRIVE_FILE_ID = '10T_qKiCLiS8EAUW4zYDOidJV45K6BtQM';
 
 let dataStore = {
@@ -11,9 +12,9 @@ let dataStore = {
 let initialized = false;
 
 async function syncFromDrive() {
-  if (!accessToken) return;
+  if (!getAccessToken()) return;
   const res = await fetch(`https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media`, {
-    headers: { 'Authorization': `Bearer ${accessToken}` }
+    headers: { 'Authorization': `Bearer ${getAccessToken()}` }
   });
   if (res.ok) {
     try {
@@ -27,11 +28,11 @@ async function syncFromDrive() {
 }
 
 async function syncToDrive() {
-  if (!accessToken) return;
+  if (!getAccessToken()) return;
   await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_FILE_ID}?uploadType=media`, {
     method: 'PATCH',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      'Authorization': `Bearer ${getAccessToken()}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(dataStore)
@@ -117,8 +118,9 @@ function calculateStats(journals, sessions) {
 
 export const api = {
   setAccessToken: async (token) => {
-    accessToken = token;
+    setToken(token);
     await syncFromDrive();
+    await gymApi.init();
   },
 
   getLockOwner: () => {
@@ -132,7 +134,7 @@ export const api = {
   },
 
   me: async () => {
-    return { authed: !!accessToken && initialized };
+    return { authed: !!getAccessToken() && initialized };
   },
 
   login: async () => {
@@ -140,7 +142,7 @@ export const api = {
   },
 
   logout: async () => {
-    accessToken = null;
+    clearAccessToken();
     initialized = false;
   },
 
