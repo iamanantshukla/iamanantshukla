@@ -14,13 +14,13 @@ export default function Home() {
   const navigate = useNavigate();
   const today = localDateString(new Date());
   const [selected, setSelected] = useState(today);
-  const [voice, setVoice] = useState(FALLBACK_VOICE);
+  const [pebbleData, setPebbleData] = useState({ text: FALLBACK_VOICE, mental_scenarios: [] });
   const [stats, setStats] = useState(null);
   const [dayJournal, setDayJournal] = useState(null);
   const [daySessions, setDaySessions] = useState([]);
   const [lastSession, setLastSession] = useState(null);
 
-  useEffect(() => { getPebbleVoice().then(setVoice); }, []);
+  useEffect(() => { getPebbleVoice().then(setPebbleData); }, []);
   useEffect(() => { api.getStats(selected).then(setStats).catch(() => {}); }, [selected]);
 
   // Load the selected day's journal + shooting sessions, plus the most recent
@@ -118,7 +118,23 @@ export default function Home() {
 
       <div className="says-card">
         <div className="says-tag"><Pebble size={18} variant="face" /> Pebble says</div>
-        <div className="says-text">{voice}</div>
+        <div className="says-text">{pebbleData.text}</div>
+        
+        {pebbleData.mental_scenarios && pebbleData.mental_scenarios.length > 0 && (
+          <div className="mental-scenarios-section" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+            <div className="says-tag" style={{ color: 'var(--accent)', marginBottom: '12px' }}>
+              <IconTarget size={16} style={{ marginRight: '6px' }}/> Mental Visualization Scenarios
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {pebbleData.mental_scenarios.map((scenario, idx) => (
+                <div key={idx} className="mental-scenario-card" style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: '8px', fontSize: '13px', lineHeight: '1.5' }}>
+                  <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--fg)' }}>Scenario {idx + 1}</strong>
+                  <span style={{ color: 'var(--fg-muted)' }}>{scenario}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="section-label">{greeting}</div>

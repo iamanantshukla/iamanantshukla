@@ -208,8 +208,30 @@ export default function DailyJournal() {
                 />
               </div>
 
-              <button onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save Journal'}</button>
-              {message && <span style={{ marginLeft: '16px' }} className="muted">{message}</span>}
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save Journal'}</button>
+                <button className="secondary" onClick={async () => {
+                  try {
+                    alert('Triggering daily review... Check the Shoot -> Reviews tab for progress.');
+                    await api.triggerDailyReview(dateStr);
+                  } catch(e) { alert(e.message); }
+                }}>Trigger Daily AI Review</button>
+                <button className="secondary" onClick={async () => {
+                  try {
+                    alert('Triggering weekly trend review... Check the Shoot -> Reviews tab for progress.');
+                    // Compute monday of current dateStr
+                    const d = new Date(dateStr + 'T00:00:00');
+                    const day = d.getDay();
+                    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+                    d.setDate(diff);
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const dayStr = String(d.getDate()).padStart(2, '0');
+                    await api.triggerWeeklyReview(`${y}-${m}-${dayStr}`);
+                  } catch(e) { alert(e.message); }
+                }}>Trigger Weekly AI Review</button>
+              </div>
+              {message && <span style={{ marginLeft: '16px', display: 'block', marginTop: '12px' }} className="muted">{message}</span>}
             </div>
           )}
         </div>

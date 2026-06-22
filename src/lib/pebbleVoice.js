@@ -10,15 +10,19 @@ export const FALLBACK_VOICE = "You're doing great. Keep showing up — small hon
 
 export async function getPebbleVoice() {
   const token = getAccessToken();
-  if (!token || pebbleVoiceFileId.startsWith('PLACEHOLDER')) return FALLBACK_VOICE;
+  const fallback = { text: FALLBACK_VOICE, mental_scenarios: [] };
+  if (!token || pebbleVoiceFileId.startsWith('PLACEHOLDER')) return fallback;
   try {
     const res = await fetch(`https://www.googleapis.com/drive/v3/files/${pebbleVoiceFileId}?alt=media`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) return FALLBACK_VOICE;
+    if (!res.ok) return fallback;
     const data = await res.json();
-    return (data && data.text && String(data.text).trim()) ? data.text : FALLBACK_VOICE;
+    return {
+      text: (data && data.text && String(data.text).trim()) ? data.text : FALLBACK_VOICE,
+      mental_scenarios: data.mental_scenarios || []
+    };
   } catch {
-    return FALLBACK_VOICE;
+    return fallback;
   }
 }

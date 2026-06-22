@@ -253,6 +253,15 @@ export default function ReviewsView() {
     }
   }
 
+  async function cancelDaily() {
+    try {
+      const res = await api.cancelDailyReview(selected);
+      setDailyReview({ review: '', status: res.status || 'failed', progress: null });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   async function triggerWeekly() {
     setTriggeringWeekly(true);
     try {
@@ -262,6 +271,15 @@ export default function ReviewsView() {
       console.error(err);
     } finally {
       setTriggeringWeekly(false);
+    }
+  }
+
+  async function cancelWeekly() {
+    try {
+      const res = await api.cancelWeeklyReview(mondayStr);
+      setWeeklyReview({ review: '', status: res.status || 'failed', progress: null });
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -297,22 +315,42 @@ export default function ReviewsView() {
           </div>
 
           {activeTab === 'daily' ? (
-            <button
-              className="secondary"
-              onClick={triggerDaily}
-              disabled={triggeringDaily || dailyReview.status === 'processing'}
-            >
-              {dailyReview.status === 'completed' ? 'Re-run Daily Review' : 'Trigger Daily Review'}
-            </button>
-          ) : (
-            weekEnded && (
+            <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 className="secondary"
-                onClick={triggerWeekly}
-                disabled={triggeringWeekly || weeklyReview.status === 'processing'}
+                onClick={triggerDaily}
+                disabled={triggeringDaily || dailyReview.status === 'processing' || dailyReview.status === 'pending'}
               >
-                {weeklyReview.status === 'completed' ? 'Re-run Weekly Review' : 'Trigger Weekly Review'}
+                {dailyReview.status === 'completed' ? 'Re-run Daily Review' : 'Trigger Daily Review'}
               </button>
+              {(dailyReview.status === 'processing' || dailyReview.status === 'pending') && (
+                <button
+                  className="secondary danger"
+                  onClick={cancelDaily}
+                >
+                  Cancel Stuck Review
+                </button>
+              )}
+            </div>
+          ) : (
+            weekEnded && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="secondary"
+                  onClick={triggerWeekly}
+                  disabled={triggeringWeekly || weeklyReview.status === 'processing' || weeklyReview.status === 'pending'}
+                >
+                  {weeklyReview.status === 'completed' ? 'Re-run Weekly Review' : 'Trigger Weekly Review'}
+                </button>
+                {(weeklyReview.status === 'processing' || weeklyReview.status === 'pending') && (
+                  <button
+                    className="secondary danger"
+                    onClick={cancelWeekly}
+                  >
+                    Cancel Stuck Review
+                  </button>
+                )}
+              </div>
             )
           )}
         </div>

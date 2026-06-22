@@ -21,27 +21,15 @@ export default function OldSessions() {
     setOpen(full);
   }
 
-  const gymItems = gymApi.listWorkouts().map((w) => ({ kind: 'gym', date: w.date, w }));
   const shotItems = sessions.map((s) => ({ kind: 'shot', date: (s.started_at || s.date || '').split('T')[0], s }));
-  const feed = [...gymItems, ...shotItems].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const feed = shotItems.sort((a, b) => (a.date < b.date ? 1 : -1));
 
   return (
     <div>
       <h2 style={{ marginBottom: '24px' }}>Your Activity Feed</h2>
       <div className="grid">
         {feed.map((item) => {
-          if (item.kind === 'gym') {
-            return (
-              <div className="card feed-card" key={`g-${item.w.id}`} style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <strong>{item.w.dayTitle}</strong><span className="muted">{item.date}</span>
-                </div>
-                <div className="muted" style={{ fontSize: '.8rem', marginTop: 8 }}>
-                  {item.w.exercises.filter((e) => (e.sets || []).length).length} exercises · {Math.round(item.w.totalVolumeKg)} kg
-                </div>
-              </div>
-            );
-          }
+
 
           const s = item.s;
           const ts = s.started_at || s.created_at || s.date;

@@ -305,5 +305,13 @@ export const api = {
 
   triggerWeeklyReview: async () => {
     throw new Error('AI capabilities are not available in the Cloud Portal.');
+  },
+
+  cancelDailyReview: async () => {
+    throw new Error('Please use your local laptop server to manage stuck reviews.');
+  },
+
+  cancelWeeklyReview: async () => {
+    throw new Error('Please use your local laptop server to manage stuck reviews.');
   }
 };
