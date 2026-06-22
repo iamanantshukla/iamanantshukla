@@ -120,16 +120,7 @@ export default function Home() {
         <div className="says-tag"><Pebble size={18} variant="face" /> Pebble says</div>
         <div className="says-text">{pebbleData.text}</div>
         
-        {pebbleData.mental_scenarios && pebbleData.mental_scenarios.length > 0 && (
-          <div className="mental-scenarios-section" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-            <div className="says-tag" style={{ color: 'var(--accent)', marginBottom: '12px' }}>
-              <IconTarget size={16} style={{ marginRight: '6px' }}/> Today's Mental Scenario
-            </div>
-            <div className="mental-scenario-card" style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: '8px', fontSize: '13px', lineHeight: '1.5' }}>
-              <span style={{ color: 'var(--fg-muted)' }}>{pebbleData.mental_scenarios[0]}</span>
-            </div>
-          </div>
-        )}
+
       </div>
 
       <div className="section-label">{greeting}</div>

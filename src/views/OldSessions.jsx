@@ -15,8 +15,11 @@ export default function OldSessions() {
       full.payload = {
         shots: full.shots || [],
         series: full.series || [],
-        skillFocus: full.skillFocus || []
+        skillFocus: full.skillFocus || [],
+        mode: full.mode || 'dry'
       };
+    } else {
+      full.payload.mode = full.mode || 'dry';
     }
     setOpen(full);
   }
@@ -74,6 +77,32 @@ export default function OldSessions() {
           const typeTags = [s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'];
           if (hasShots) typeTags.push('Shot Calling');
           if (skillsTrained && skillsTrained.length > 0) typeTags.push('Skill Focus');
+
+          if (s.mode === 'mental') {
+            return (
+              <div className="card feed-card" key={s.id} style={{ borderLeft: '4px solid var(--accent)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--accent)' }}>Mental Training</h3>
+                  <span className="muted" style={{ fontSize: '0.85rem', marginLeft: '12px' }}>{dateStr}</span>
+                </div>
+                
+                <div className="stat-grid" style={{ gridTemplateColumns: '1fr' }}>
+                  <div className="stat-item">
+                    <span className="stat-label">Total Time</span>
+                    <span className="stat-value">{Math.floor((s.duration_seconds || 0) / 60)}m {(s.duration_seconds || 0) % 60}s</span>
+                  </div>
+                </div>
+
+                {s.comments && (
+                  <div style={{ margin: '16px 0', padding: '12px', background: 'var(--panel-2)', borderRadius: 'var(--radius)', borderLeft: '3px solid var(--accent)' }}>
+                    <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text)' }}>"{s.comments}"</p>
+                  </div>
+                )}
+
+                <button onClick={() => view(s.id)} style={{ width: '100%', marginTop: '8px' }}>View Notes</button>
+              </div>
+            );
+          }
 
           return (
           <div className="card feed-card" key={s.id}>

@@ -89,7 +89,7 @@ export default function SummaryModal({ session, activeTab, onClose, onSave, savi
         <h2>Session Summary</h2>
         
         <div style={{ maxHeight: '70vh', overflowY: 'auto', margin: '16px 0' }}>
-          {showShots && (
+          {session.mode !== 'mental' && showShots && (
             <div className="summary-cols">
               <div>
                 <h3>Calls (hollow)</h3>
@@ -106,7 +106,7 @@ export default function SummaryModal({ session, activeTab, onClose, onSave, savi
             </div>
           )}
 
-          {showSkills && (
+          {session.mode !== 'mental' && showSkills && (
             <div style={{ marginTop: showShots ? '24px' : '0' }}>
               {showShots && <hr style={{ marginBottom: '16px', borderColor: 'var(--line)' }} />}
               {chunkedTables.length === 0 ? <p className="muted">No skills recorded.</p> : (
@@ -153,7 +153,7 @@ export default function SummaryModal({ session, activeTab, onClose, onSave, savi
 
         {onSave ? (
           <div className="form-group" style={{ marginTop: '16px', marginBottom: '16px' }}>
-            {!hasRecordedShots && (
+            {!hasRecordedShots && session.mode !== 'mental' && (
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px' }}>Total Shots / Reps (Dry Fire)</label>
                 <input 
@@ -165,22 +165,22 @@ export default function SummaryModal({ session, activeTab, onClose, onSave, savi
                 />
               </div>
             )}
-            <label style={{ display: 'block', marginBottom: '8px' }}>Session Comments</label>
+            <label style={{ display: 'block', marginBottom: '8px' }}>{session.mode === 'mental' ? 'How did you feel?' : 'Session Comments'}</label>
             <textarea
               style={{ width: '100%', minHeight: '80px', background: 'var(--panel-2)', color: 'var(--text)', border: '1px solid var(--line)', padding: '8px', borderRadius: '4px' }}
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              placeholder="Immediate observations from the session..."
+              placeholder={session.mode === 'mental' ? "E.g. Struggled to visualize the trigger squeeze, felt very calm..." : "Immediate observations from the session..."}
             />
           </div>
         ) : (
           <div className="form-group" style={{ marginTop: '16px', marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px' }}>Session Comments</label>
+            <label style={{ display: 'block', marginBottom: '8px' }}>{session.mode === 'mental' ? 'How did you feel?' : 'Session Comments'}</label>
             <textarea
               style={{ width: '100%', minHeight: '80px', background: 'var(--panel-2)', color: 'var(--text)', border: '1px solid var(--line)', padding: '8px', borderRadius: '4px' }}
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              placeholder="Immediate observations from the session..."
+              placeholder={session.mode === 'mental' ? "E.g. Struggled to visualize the trigger squeeze, felt very calm..." : "Immediate observations from the session..."}
             />
             {comments !== initialComments && (
               <button
@@ -203,7 +203,7 @@ export default function SummaryModal({ session, activeTab, onClose, onSave, savi
         {onSave ? (
           <div className="row">
             <button onClick={() => onSave(comments, manualShots)} disabled={saving}>{saving ? 'Saving…' : 'Save Session'}</button>
-            <button className="secondary" onClick={onClose}>Keep Shooting</button>
+            <button className="secondary" onClick={onClose}>{session.mode === 'mental' ? 'Keep Meditating' : 'Keep Shooting'}</button>
           </div>
         ) : (
           <div className="row">

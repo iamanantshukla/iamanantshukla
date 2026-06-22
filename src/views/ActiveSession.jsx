@@ -78,7 +78,7 @@ export default function ActiveSession() {
     navigate('/shoot');
   }
 
-  const modeLabel = s.mode === 'dry' ? 'Dry Fire' : 'Live Fire';
+  const modeLabel = s.mode === 'mental' ? 'Mental Training' : (s.mode === 'dry' ? 'Dry Fire' : 'Live Fire');
 
   return (
     <div className="session-fullscreen">
@@ -98,12 +98,14 @@ export default function ActiveSession() {
       </header>
 
       <div className="session-body">
-        <div className="subtabs">
-          <button className={subtab === 'shot' ? 'active' : ''} onClick={() => setSubtab('shot')}>Shot Calling</button>
-          <button className={subtab === 'skill' ? 'active' : ''} onClick={() => setSubtab('skill')}>Skill Focus</button>
-          <div style={{ flex: 1 }} />
-          <button className="secondary" onClick={() => setNoteOpen((o) => !o)}><IconPlus size={16} /> Note</button>
-        </div>
+        {s.mode !== 'mental' && (
+          <div className="subtabs">
+            <button className={subtab === 'shot' ? 'active' : ''} onClick={() => setSubtab('shot')}>Shot Calling</button>
+            <button className={subtab === 'skill' ? 'active' : ''} onClick={() => setSubtab('skill')}>Skill Focus</button>
+            <div style={{ flex: 1 }} />
+            <button className="secondary" onClick={() => setNoteOpen((o) => !o)}><IconPlus size={16} /> Note</button>
+          </div>
+        )}
 
         {noteOpen && (
           <div className="live-note">
@@ -116,24 +118,36 @@ export default function ActiveSession() {
         )}
         {msg && <p className="muted">{msg}</p>}
 
-        {/* Both subtabs stay mounted; hide to preserve state. */}
-        <div style={{ display: subtab === 'shot' ? 'block' : 'none' }}>
-          <div className="shotcall">
-            <div className="target-wrap">
-              <div className="series-nav">
-                <button className="secondary" onClick={prevSeries} disabled={s.currentSeries === 0}>←</button>
-                <span>Series {s.currentSeries + 1} · {shots.length}/10{s.armedActual ? ' · placing ACTUAL' : ''}</span>
-                <button className="secondary" onClick={nextSeries}>→</button>
-              </div>
-              <TargetCanvas shots={shots} onTap={onTap} armed={!!s.armedActual} />
-            </div>
-            <SeriesPanel />
+        {s.mode === 'mental' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center' }}>
+            <h2 style={{ color: 'var(--accent)', marginBottom: '16px' }}>Mental Training</h2>
+            <p style={{ color: 'var(--muted)', maxWidth: '400px' }}>
+              Close your eyes and visualize the scenario. 
+              The timer is running. Tap End when you have completed your visualization sets.
+            </p>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Both subtabs stay mounted; hide to preserve state. */}
+            <div style={{ display: subtab === 'shot' ? 'block' : 'none' }}>
+              <div className="shotcall">
+                <div className="target-wrap">
+                  <div className="series-nav">
+                    <button className="secondary" onClick={prevSeries} disabled={s.currentSeries === 0}>←</button>
+                    <span>Series {s.currentSeries + 1} · {shots.length}/10{s.armedActual ? ' · placing ACTUAL' : ''}</span>
+                    <button className="secondary" onClick={nextSeries}>→</button>
+                  </div>
+                  <TargetCanvas shots={shots} onTap={onTap} armed={!!s.armedActual} />
+                </div>
+                <SeriesPanel />
+              </div>
+            </div>
 
-        <div style={{ display: subtab === 'skill' ? 'block' : 'none' }}>
-          <SkillFocusTable />
-        </div>
+            <div style={{ display: subtab === 'skill' ? 'block' : 'none' }}>
+              <SkillFocusTable />
+            </div>
+          </>
+        )}
 
         <div className="session-footer">
           <button className="secondary discard-link" onClick={() => setConfirmDiscard(true)}>Discard session</button>
@@ -142,7 +156,7 @@ export default function ActiveSession() {
 
       {showSummary && (
         <SummaryModal
-          session={{ series: s.series, skillFocus: s.skillFocus }}
+          session={{ series: s.series, skillFocus: s.skillFocus, mode: s.mode }}
           activeTab={subtab}
           liveNotes={s.liveNotes}
           onClose={() => setShowSummary(false)}
