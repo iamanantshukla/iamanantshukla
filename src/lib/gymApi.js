@@ -4,7 +4,7 @@ import { getAccessToken } from './auth.js';
 
 // Drive file id. Defaults to a placeholder so the app degrades to in-memory until a
 // real id is set (paste it in here, or call gymApi.setFileId(id) at runtime). See UI_UPDATE.md.
-let gymFileId = 'PLACEHOLDER_GYM_DRIVE_FILE_ID';
+let gymFileId = '1DmdKxwzLGIfYA4zN1Q19D3DuJgIj7W2v';
 const usingPlaceholder = () => gymFileId.startsWith('PLACEHOLDER');
 let store = { workouts: [], orderOverrides: {} };
 let initialized = false;

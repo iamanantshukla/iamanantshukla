@@ -4,7 +4,7 @@ import { getAccessToken } from './auth.js';
 
 // Drive file id. Placeholder by default → home shows FALLBACK_VOICE until a real id is set
 // (paste it here, or call setPebbleVoiceFileId(id) at runtime). See UI_UPDATE.md.
-let pebbleVoiceFileId = 'PLACEHOLDER_PEBBLE_VOICE_FILE_ID';
+let pebbleVoiceFileId = '1h3qcB7Ynnnm04Kghe1n9ocf9IYu0cbcj';
 export const setPebbleVoiceFileId = (id) => { if (id) pebbleVoiceFileId = id; };
 export const FALLBACK_VOICE = "You're doing great. Keep showing up — small honest reps add up.";
 
