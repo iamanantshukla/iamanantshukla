@@ -185,25 +185,7 @@ export default function DailyJournal() {
                 )}
               </div>
 
-              <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={journal.gym}
-                    onChange={(e) => setJournal({ ...journal, gym: e.target.checked })}
-                  />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><IconDumbbell size={16} /> Gym</span>
-                </label>
-                {journal.gym && (
-                  <input
-                    type="text"
-                    placeholder="Muscle groups targeted (e.g. Chest and Triceps)"
-                    value={journal.gym_muscles}
-                    onChange={(e) => setJournal({ ...journal, gym_muscles: e.target.value })}
-                    style={{ marginTop: '8px', width: '100%' }}
-                  />
-                )}
-              </div>
+
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><IconMoon size={16} /> Total Sleeping hours (hh:mm or text)</span></label>
