@@ -1,0 +1,15 @@
+{
+  "name": "Pebble Training Journal",
+  "short_name": "Pebble",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1A1A1A",
+  "theme_color": "#FF6A3D",
+  "icons": [
+    {
+      "src": "pebble.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
