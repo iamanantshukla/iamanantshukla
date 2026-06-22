@@ -123,15 +123,10 @@ export default function Home() {
         {pebbleData.mental_scenarios && pebbleData.mental_scenarios.length > 0 && (
           <div className="mental-scenarios-section" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
             <div className="says-tag" style={{ color: 'var(--accent)', marginBottom: '12px' }}>
-              <IconTarget size={16} style={{ marginRight: '6px' }}/> Mental Visualization Scenarios
+              <IconTarget size={16} style={{ marginRight: '6px' }}/> Today's Mental Scenario
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {pebbleData.mental_scenarios.map((scenario, idx) => (
-                <div key={idx} className="mental-scenario-card" style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: '8px', fontSize: '13px', lineHeight: '1.5' }}>
-                  <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--fg)' }}>Scenario {idx + 1}</strong>
-                  <span style={{ color: 'var(--fg-muted)' }}>{scenario}</span>
-                </div>
-              ))}
+            <div className="mental-scenario-card" style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: '8px', fontSize: '13px', lineHeight: '1.5' }}>
+              <span style={{ color: 'var(--fg-muted)' }}>{pebbleData.mental_scenarios[0]}</span>
             </div>
           </div>
         )}
