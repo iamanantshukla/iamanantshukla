@@ -15,7 +15,8 @@ const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 
 export default function ActiveSession() {
   const s = useSession();
   const navigate = useNavigate();
-  const [subtab, setSubtab] = useState(s.focus || 'shot'); // 'shot' | 'skill'
+  const isMatch = s.focus === 'match';
+  const [subtab, setSubtab] = useState(s.focus === 'skill' ? 'skill' : 'shot'); // 'shot' | 'skill'
   const [showSummary, setShowSummary] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
@@ -38,7 +39,7 @@ export default function ActiveSession() {
     }
   }, [s.finishRequested, s]);
 
-  useEffect(() => { if (s.focus) setSubtab(s.focus); }, [s.focus]);
+  useEffect(() => { if (s.focus === 'shot' || s.focus === 'skill') setSubtab(s.focus); }, [s.focus]);
 
   function onTap(mm) {
     if (s.armedActual) s.logActual(mm);
@@ -51,17 +52,20 @@ export default function ActiveSession() {
     s.setCurrentSeries(next);
   }
 
-  async function save(comments, manualShots) {
+  // extra: { reflection, drive_link, sius_file_name, sius_file_text, match_observation }
+  async function save(comments, manualShots, extra = {}) {
     setSaving(true); setMsg('');
     try {
       await api.saveSession({
         mode: s.mode,
+        focus: s.focus,
         duration_seconds: s.seconds,
         series: s.series,
         skillFocus: s.skillFocus,
         comments,
         manual_shots: Number(manualShots) || 0,
         live_notes: s.liveNotes,
+        ...extra,
       });
       setShowSummary(false);
       s.reset();           // clears sessionActive -> leaves activity mode
@@ -78,7 +82,7 @@ export default function ActiveSession() {
     navigate('/shoot');
   }
 
-  const modeLabel = s.mode === 'mental' ? 'Mental Training' : (s.mode === 'dry' ? 'Dry Fire' : 'Live Fire');
+  const modeLabel = s.mode === 'mental' ? 'Mental Training' : (isMatch ? 'Live Match' : (s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'));
 
   return (
     <div className="session-fullscreen">
@@ -100,8 +104,13 @@ export default function ActiveSession() {
       <div className="session-body">
         {s.mode !== 'mental' && (
           <div className="subtabs">
-            <button className={subtab === 'shot' ? 'active' : ''} onClick={() => setSubtab('shot')}>Shot Calling</button>
-            <button className={subtab === 'skill' ? 'active' : ''} onClick={() => setSubtab('skill')}>Skill Focus</button>
+            {!isMatch && (
+              <>
+                <button className={subtab === 'shot' ? 'active' : ''} onClick={() => setSubtab('shot')}>Shot Calling</button>
+                <button className={subtab === 'skill' ? 'active' : ''} onClick={() => setSubtab('skill')}>Skill Focus</button>
+              </>
+            )}
+            {isMatch && <span className="session-mode" style={{ alignSelf: 'center' }}>Match string in progress</span>}
             <div style={{ flex: 1 }} />
             <button className="secondary" onClick={() => setNoteOpen((o) => !o)}><IconPlus size={16} /> Note</button>
           </div>
@@ -109,12 +118,21 @@ export default function ActiveSession() {
 
         {noteOpen && (
           <div className="live-note">
-            <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="What did you feel this shot? (e.g. pulled left, grip slipped)" />
+            <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder={isMatch ? "What's going through your mind right now? (e.g. lost focus after a 7, reset routine)" : "What did you feel this shot? (e.g. pulled left, grip slipped)"} />
             <button onClick={addNote}>Save note</button>
           </div>
         )}
         {s.liveNotes.length > 0 && (
-          <ul className="live-note-list">{s.liveNotes.map((n, i) => <li key={i}>{n.text}</li>)}</ul>
+          <ul className="live-note-list">
+            {s.liveNotes.map((n, i) => (
+              <li key={i}>
+                {(n.series || n.t != null) && (
+                  <span className="note-meta">{n.series ? `Series ${n.series}` : ''}{n.series && n.t != null ? ' · ' : ''}{n.t != null ? fmt(n.t) : ''}</span>
+                )}
+                {n.text}
+              </li>
+            ))}
+          </ul>
         )}
         {msg && <p className="muted">{msg}</p>}
 
@@ -124,6 +142,16 @@ export default function ActiveSession() {
             <p style={{ color: 'var(--muted)', maxWidth: '400px' }}>
               Close your eyes and visualize the scenario. 
               The timer is running. Tap End when you have completed your visualization sets.
+            </p>
+          </div>
+        ) : isMatch ? (
+          <div className="match-panel">
+            <IconTarget size={40} />
+            <h3 style={{ margin: '12px 0 4px' }}>Live Match</h3>
+            <p className="muted" style={{ maxWidth: 360 }}>
+              Shoot your string. Tap <strong>Note</strong> whenever something goes through your mind so you can trace
+              how your focus moved through the match. End the session to add your SIUS file, a video link, your scores,
+              and your match observation.
             </p>
           </div>
         ) : (
@@ -157,7 +185,9 @@ export default function ActiveSession() {
       {showSummary && (
         <SummaryModal
           session={{ series: s.series, skillFocus: s.skillFocus, mode: s.mode }}
-          activeTab={subtab}
+          activeTab={isMatch ? 'match' : subtab}
+          focus={s.focus}
+          mode={s.mode}
           liveNotes={s.liveNotes}
           onClose={() => setShowSummary(false)}
           onSave={save}

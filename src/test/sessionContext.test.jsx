@@ -32,4 +32,23 @@ describe('SessionContext', () => {
     act(() => result.current.reset());
     expect(result.current.liveNotes).toEqual([]);
   });
+
+  it('tags live notes with the current series', () => {
+    const { result } = renderHook(() => useSession(), { wrapper });
+    act(() => result.current.ensureSeries(1));
+    act(() => result.current.setCurrentSeries(1));
+    act(() => result.current.addLiveNote('reset after a wide shot'));
+    const note = result.current.liveNotes[0];
+    expect(note.text).toBe('reset after a wide shot');
+    expect(note.series).toBe(2); // currentSeries 1 -> displayed Series 2
+    expect(typeof note.t).toBe('number');
+  });
+
+  it('starts a live-match session as live fire with focus=match', () => {
+    const { result } = renderHook(() => useSession(), { wrapper });
+    act(() => result.current.startSession('dry', 'match'));
+    expect(result.current.focus).toBe('match');
+    expect(result.current.mode).toBe('live'); // match always implies live fire
+    expect(result.current.sessionActive).toBe(true);
+  });
 });

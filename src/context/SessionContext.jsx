@@ -8,7 +8,7 @@ const emptySeries = (index) => ({ index, shots: [] });
 
 export function SessionProvider({ children }) {
   const [mode, setMode] = useState('dry');
-  const [focus, setFocus] = useState('shot'); // 'shot' | 'skill'
+  const [focus, setFocus] = useState('shot'); // 'shot' | 'skill' | 'match'
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [series, setSeries] = useState([emptySeries(0)]);
@@ -32,10 +32,12 @@ export function SessionProvider({ children }) {
   const stop = useCallback(() => { setRunning(false); setFinishRequested(true); }, []);
 
   // Begin a fresh full-screen session with the chosen mode/focus.
+  // focus 'match' is a live competition string: timer + notes only (no target/skill grid),
+  // and always implies live fire.
   const startSession = useCallback((nextMode = 'dry', nextFocus = 'shot') => {
     setSeries([emptySeries(0)]); setCurrentSeries(0); setArmedActual(null);
     setSkillFocus([]); setLiveNotes([]); setSeconds(0); setFinishRequested(false);
-    setMode(nextMode); setFocus(nextFocus);
+    setMode(nextFocus === 'match' ? 'live' : nextMode); setFocus(nextFocus);
     setSessionActive(true); setRunning(true);
   }, []);
 
@@ -70,10 +72,12 @@ export function SessionProvider({ children }) {
 
   const armActual = useCallback((seriesIndex, shotN) => setArmedActual({ seriesIndex, shotN }), []);
 
+  // Capture an in-the-moment note tagged with elapsed time and the current series, so the
+  // saved notes read as a timeline of how the mind moved through the series/shots/string.
   const addLiveNote = useCallback((text) => {
     if (!text || !text.trim()) return;
-    setLiveNotes((prev) => [...prev, { t: 0, text: text.trim() }]);
-  }, []);
+    setLiveNotes((prev) => [...prev, { t: seconds, series: currentSeries + 1, text: text.trim() }]);
+  }, [seconds, currentSeries]);
 
   const ensureSeries = useCallback((index) => {
     setSeries((prev) => (prev[index] ? prev : [...prev, emptySeries(index)]));

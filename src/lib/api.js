@@ -65,6 +65,18 @@ function parseSleepHours(str) {
   return hrs + (mins / 60);
 }
 
+// Average a numeric journal field across entries that actually recorded it (value > 0),
+// rounded to 1 decimal. Returns { avg, count } so callers can hide signals nobody logged.
+function avgField(journals, field) {
+  let sum = 0;
+  let count = 0;
+  journals.forEach(j => {
+    const n = Number(j[field]);
+    if (n > 0) { sum += n; count++; }
+  });
+  return { avg: count > 0 ? Math.round((sum / count) * 10) / 10 : 0, count };
+}
+
 function calculateStats(journals, sessions) {
   let gymSessions = 0;
   let gymMuscles = [];
@@ -74,6 +86,8 @@ function calculateStats(journals, sessions) {
   let sleepCount = 0;
   let sessionDurationSeconds = 0;
   let sessionShots = 0;
+  let moodCount = 0; // days a mood was recorded
+  const tagCounts = {};
 
   journals.forEach(j => {
     if (j.gym === true || j.gym === 1) {
@@ -89,12 +103,23 @@ function calculateStats(journals, sessions) {
       sleepSum += sleep;
       sleepCount++;
     }
+    if (j.mood) moodCount++;
+    if (Array.isArray(j.tags)) {
+      j.tags.forEach(t => { if (t) tagCounts[t] = (tagCounts[t] || 0) + 1; });
+    }
   });
 
   sessions.forEach(s => {
     sessionDurationSeconds += s.duration_seconds || 0;
     sessionShots += s.total_shots || (s.shots ? s.shots.length : 0);
   });
+
+  // Structured well-being signals (additive; absent on legacy days, so averaged over
+  // only the days that recorded them). Surfaced as the journal's long-term trends.
+  const topTags = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([tag, count]) => ({ tag, count }));
 
   return {
     gym: {
@@ -112,6 +137,16 @@ function calculateStats(journals, sessions) {
     sessions: {
       totalHours: Math.round((sessionDurationSeconds / 3600) * 10) / 10,
       totalShots: sessionShots
+    },
+    checkin: {
+      daysLogged: moodCount,
+      energy: avgField(journals, 'energy'),
+      body: avgField(journals, 'body'),
+      stress: avgField(journals, 'stress'),
+      sleepQuality: avgField(journals, 'sleep_quality'),
+      trainingRpe: avgField(journals, 'training_rpe'),
+      shootingFeel: avgField(journals, 'shooting_feel'),
+      topTags
     }
   };
 }
@@ -203,6 +238,20 @@ export const api = {
         gym_muscles: '',
         sleeping_hours: '',
         observation: '',
+        // Structured daily check-in fields (additive; legacy/empty days read cleanly).
+        mood: '',
+        energy: 0,
+        body: 0,
+        stress: 0,
+        sleep_quality: 0,
+        training_rpe: 0,
+        shooting_feel: 0,
+        highlight: '',
+        challenge: '',
+        lesson: '',
+        gratitude: '',
+        tomorrow_focus: '',
+        tags: [],
         ai_review: '',
         ai_review_status: 'none'
       };

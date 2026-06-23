@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { gymApi } from '../lib/gymApi.js';
 import SummaryModal from '../components/SummaryModal.jsx';
+import { IconLink } from '../components/Icons.jsx';
 
 export default function OldSessions() {
   const [sessions, setSessions] = useState([]);
@@ -74,9 +75,10 @@ export default function OldSessions() {
           const hasShots = s.hasShots ?? (totalShots > 0);
           const skillsTrained = s.skillsTrained || (s.skillFocus ? [...new Set(s.skillFocus.map(sf => sf.name))] : []);
 
-          const typeTags = [s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'];
-          if (hasShots) typeTags.push('Shot Calling');
-          if (skillsTrained && skillsTrained.length > 0) typeTags.push('Skill Focus');
+          const isMatch = s.focus === 'match';
+          const typeTags = isMatch ? ['Live Match'] : [s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'];
+          if (!isMatch && hasShots) typeTags.push('Shot Calling');
+          if (!isMatch && skillsTrained && skillsTrained.length > 0) typeTags.push('Skill Focus');
 
           if (s.mode === 'mental') {
             return (
@@ -139,10 +141,16 @@ export default function OldSessions() {
               )}
             </div>
 
-            {s.comments && (
+            {(s.comments || s.match_observation) && (
               <div style={{ margin: '16px 0', padding: '12px', background: 'var(--panel-2)', borderRadius: 'var(--radius)', borderLeft: '3px solid var(--accent)' }}>
-                <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text)' }}>"{s.comments}"</p>
+                <p style={{ margin: 0, fontStyle: 'italic', color: 'var(--text)' }}>"{s.match_observation || s.comments}"</p>
               </div>
+            )}
+
+            {s.drive_link && (
+              <a className="session-link" href={s.drive_link} target="_blank" rel="noopener noreferrer">
+                <IconLink size={15} /> {isMatch ? 'Match video / photos' : 'Session video / photos'}
+              </a>
             )}
 
             <button onClick={() => view(s.id)} style={{ width: '100%', marginTop: '8px' }}>View Analysis</button>
