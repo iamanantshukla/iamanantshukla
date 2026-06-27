@@ -105,13 +105,28 @@ export default function SkillFocusTable() {
       <div className="row" style={{ marginBottom: 12 }}>
         <button onClick={() => setAdding((v) => !v)}>+ Add Skill</button>
         {adding && (
-          <select defaultValue="" onChange={(e) => {
-            const s = catalogue.find((c) => String(c.id) === e.target.value);
-            if (s) addSkill(s);
-          }}>
-            <option value="" disabled>Select a skill…</option>
-            {catalogue.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
+          <>
+            <input
+              list="skills-datalist"
+              placeholder="Type or select a skill..."
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                  const val = e.target.value.trim();
+                  const match = catalogue.find(c => c.name.toLowerCase() === val.toLowerCase());
+                  if (match) {
+                    addSkill(match);
+                  } else {
+                    setSkillFocus(prev => [...prev, { skillId: null, name: val, cells: Array(10).fill('') }]);
+                    setAdding(false);
+                  }
+                }
+              }}
+            />
+            <datalist id="skills-datalist">
+              {catalogue.map((s) => <option key={s.id} value={s.name} />)}
+            </datalist>
+          </>
         )}
       </div>
 

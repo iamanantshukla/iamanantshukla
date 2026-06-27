@@ -268,7 +268,7 @@ export default function DailyJournal() {
             {sessions.map((s) => {
               const { totalShots, hasShots, skillsTrained, ts } = deriveSession(s);
               const isMatch = s.focus === 'match';
-              const typeTags = isMatch ? ['Live Match'] : [s.mode === 'dry' ? 'Dry Fire' : 'Live Fire'];
+              const typeTags = isMatch ? ['Live Match'] : [s.mode === 'mental' ? 'Mental Training' : (s.mode === 'dry' ? 'Dry Fire' : 'Live Fire')];
               if (!isMatch && hasShots) typeTags.push('Shot Calling');
               if (!isMatch && skillsTrained && skillsTrained.length > 0) typeTags.push('Skill Focus');
               const timeLabel = ts ? new Date(String(ts).replace(' ', 'T')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';

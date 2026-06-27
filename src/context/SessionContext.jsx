@@ -31,9 +31,19 @@ export function SessionProvider({ children }) {
   const firstShotAt = useRef((draft0 && draft0.firstShotAt) || null);
   const timer = useRef(null);
 
+  const [id, setId] = useState(() => (draft0 && draft0.id) || null);
+
   useEffect(() => {
     if (running) {
-      timer.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+      let lastTick = Date.now();
+      timer.current = setInterval(() => {
+        const now = Date.now();
+        const delta = Math.round((now - lastTick) / 1000);
+        if (delta >= 1) {
+          setSeconds((s) => s + delta);
+          lastTick += delta * 1000;
+        }
+      }, 1000);
       return () => clearInterval(timer.current);
     }
   }, [running]);
@@ -44,10 +54,10 @@ export function SessionProvider({ children }) {
   useEffect(() => {
     if (!sessionActive) return;
     saveDraft({
-      mode, focus, seconds, series, currentSeries, skillFocus, liveNotes, sessionActive, sessionMeta,
+      id, mode, focus, seconds, series, currentSeries, skillFocus, liveNotes, sessionActive, sessionMeta,
       startedAt: startedAt.current, firstShotAt: firstShotAt.current,
     });
-  }, [mode, focus, seconds, series, currentSeries, skillFocus, liveNotes, sessionActive, sessionMeta]);
+  }, [id, mode, focus, seconds, series, currentSeries, skillFocus, liveNotes, sessionActive, sessionMeta]);
 
   // Stamp the first-shot time the first time a shot is recorded (drives the tap->first-shot metric).
   const markFirstShot = useCallback(() => { if (!firstShotAt.current) firstShotAt.current = nowIso(); }, []);
@@ -62,6 +72,7 @@ export function SessionProvider({ children }) {
   // focus 'offline' is a timed physical block (e.g. wall holding): timer + notes only, like a mental
   //   session but for physical work. Optional `meta` ({ label, durationMin }) is kept for the header.
   const startSession = useCallback((nextMode = 'dry', nextFocus = 'shot', meta = null) => {
+    setId(null);
     setSeries([emptySeries(0)]); setCurrentSeries(0); setArmedActual(null); setArmedCall(null);
     // Seed suggested skills (skill-focus) as pending rows — resolved against the catalogue at render
     // (non-restrictive: a skill not in the catalogue is still listed, the user can add it). Each row
@@ -172,6 +183,7 @@ export function SessionProvider({ children }) {
   }, []);
 
   const reset = useCallback(() => {
+    setId(null);
     setSeries([emptySeries(0)]); setCurrentSeries(0); setArmedActual(null); setArmedCall(null);
     setSkillFocus([]); setSeconds(0); setRunning(false); setFinishRequested(false);
     setLiveNotes([]); setSessionActive(false); setSessionMeta(null);
@@ -180,7 +192,7 @@ export function SessionProvider({ children }) {
   }, []);
 
   const value = {
-    mode, setMode, focus, setFocus, seconds, running, play, pause, stop,
+    id, mode, setMode, focus, setFocus, seconds, running, play, pause, stop,
     series, currentSeries, setCurrentSeries, ensureSeries,
     armedActual, armActual, logCall, logActual,
     // edit-a-shot + call→actuals flow primitives (§4.3)

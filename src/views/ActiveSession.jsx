@@ -71,6 +71,7 @@ export default function ActiveSession() {
     setSaving(true); setMsg('');
     try {
       await api.saveSession({
+        id: s.id,
         mode: s.mode,
         focus: s.focus,
         duration_seconds: s.seconds,
@@ -98,7 +99,12 @@ export default function ActiveSession() {
         stats,
       });
     } catch (e) {
-      setMsg(e.message || 'Save failed');
+      if (e.message && (e.message.includes('401') || e.message.toLowerCase().includes('unauthorized') || e.name === 'ReauthRequiredError')) {
+        window.dispatchEvent(new Event('jarvis-auth-timeout'));
+        setMsg('Session expired. Please log in again.');
+      } else {
+        setMsg(e.message || 'Save failed');
+      }
     } finally {
       setSaving(false);
     }
