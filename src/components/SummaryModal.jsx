@@ -59,9 +59,9 @@ export default function SummaryModal({ session, activeTab, focus, mode, onClose,
   const [manualShots, setManualShots] = useState('');
   const [savingComments, setSavingComments] = useState(false);
   // Structured reflection + match attachments (only collected when saving a session).
-  const [reflection, setReflection] = useState({});
-  const [wentWell, setWentWell] = useState('');
-  const [workOn, setWorkOn] = useState('');
+  const [reflection, setReflection] = useState(session.reflection || {});
+  const [wentWell, setWentWell] = useState(session.reflection?.went_well || '');
+  const [workOn, setWorkOn] = useState(session.reflection?.work_on || '');
   const [driveLink, setDriveLink] = useState('');
   const [matchObservation, setMatchObservation] = useState('');
   const [siusName, setSiusName] = useState('');
@@ -70,8 +70,10 @@ export default function SummaryModal({ session, activeTab, focus, mode, onClose,
 
   const isMatch = focus === 'match' || activeTab === 'match';
   const isLive = mode === 'live' || isMatch;
-  // Reflection questionnaire applies to shot-calling and match sessions (not skill focus).
-  const showReflection = !!onSave && (isMatch || activeTab === 'shot');
+  const hasReflection = session.reflection && Object.keys(session.reflection).length > 0;
+  // Reflection questionnaire applies to shot-calling and match sessions (not skill focus),
+  // OR when viewing a past session that already has a reflection.
+  const showReflection = (!!onSave && (isMatch || activeTab === 'shot')) || hasReflection;
 
   const onReadSius = (e) => {
     const file = e.target.files && e.target.files[0];
@@ -233,21 +235,23 @@ export default function SummaryModal({ session, activeTab, focus, mode, onClose,
             <h3 style={{ margin: '4px 0 0' }}>How did it feel?</h3>
             <div className="ref-group-label">Technique</div>
             {TECHNIQUE_PROMPTS.map((p) => (
-              <RatingRow key={p.key} label={p.label} value={reflection[p.key] || 0} onChange={(v) => rate(p.key, v)} />
+              <RatingRow key={p.key} label={p.label} value={reflection[p.key] || 0} onChange={onSave ? (v) => rate(p.key, v) : () => {}} />
             ))}
             <div className="ref-group-label">Mind &amp; execution</div>
             {MENTAL_PROMPTS.map((p) => (
-              <RatingRow key={p.key} label={p.label} value={reflection[p.key] || 0} onChange={(v) => rate(p.key, v)} />
+              <RatingRow key={p.key} label={p.label} value={reflection[p.key] || 0} onChange={onSave ? (v) => rate(p.key, v) : () => {}} />
             ))}
             <div style={{ marginTop: '14px' }}>
               <label style={{ display: 'block', marginBottom: '6px' }}>What went well?</label>
               <textarea value={wentWell} onChange={(e) => setWentWell(e.target.value)}
+                readOnly={!onSave}
                 placeholder="What worked today?"
                 style={{ width: '100%', minHeight: '60px', background: 'var(--panel-2)', color: 'var(--text)', border: '1px solid var(--line)', padding: '8px', borderRadius: '8px' }} />
             </div>
             <div style={{ marginTop: '10px' }}>
               <label style={{ display: 'block', marginBottom: '6px' }}>What to work on?</label>
               <textarea value={workOn} onChange={(e) => setWorkOn(e.target.value)}
+                readOnly={!onSave}
                 placeholder="One thing to improve next time"
                 style={{ width: '100%', minHeight: '60px', background: 'var(--panel-2)', color: 'var(--text)', border: '1px solid var(--line)', padding: '8px', borderRadius: '8px' }} />
             </div>
