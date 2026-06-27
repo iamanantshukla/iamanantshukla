@@ -95,6 +95,7 @@ export function JarvisProvider({ children, today = localToday() }) {
   const [pebble, setPebble] = useState(() => readCachedSingleton('pebble'));
   const [mission, setMission] = useState(() => readCachedSingleton('today'));
   const [campaign, setCampaign] = useState(() => readCachedSingleton('campaign'));
+  const [planWeek, setPlanWeek] = useState(() => readCachedSingleton('plan-week'));
   // sims = the Campaign dashboard aggregates (§4.2): agent-written, read-only, cache-first.
   const [sims, setSims] = useState(() => readCachedSingleton('sims'));
   // Today's logged mood drives the happy/sad/sleepy Pebble (§2). It lives on the journal record,
@@ -120,6 +121,7 @@ export function JarvisProvider({ children, today = localToday() }) {
     refresh('pebble', pebble, setPebble);
     refresh('today', mission, setMission);
     refresh('campaign', campaign, setCampaign);
+    refresh('plan-week', planWeek, setPlanWeek);
     refresh('sims', sims, setSims);
     // Read today's journal mood so the Pebble expression matches how the day actually felt (§2).
     // Best-effort: a missing journal / offline read leaves the expression on its agent-derived value.
@@ -147,6 +149,7 @@ export function JarvisProvider({ children, today = localToday() }) {
       pebble,
       mission,
       campaign,
+      planWeek,
       sims,
       line,
       mentalScenario: scenarios[0] || (mission && mission.mental && mission.mental.scenario) || null,
@@ -157,7 +160,7 @@ export function JarvisProvider({ children, today = localToday() }) {
       // theme-persistent); otherwise the static theme-block fallback so the footer is never empty.
       tip: (pebble && pebble.daily_tip) ? pebble.daily_tip : fallbackTip(),
     };
-  }, [pebble, mission, campaign, sims, mood]);
+  }, [pebble, mission, campaign, planWeek, sims, mood]);
 
   return <JarvisCtx.Provider value={value}>{children}</JarvisCtx.Provider>;
 }

@@ -28,7 +28,13 @@ export default function Home() {
   const { startSession } = useSession();
   const jarvis = useJarvis();
   const today = localDateString(new Date());
-  const mission = jarvis.mission;
+  
+  const [selectedDate, setSelectedDate] = useState(today);
+  const mission = useMemo(() => {
+    if (selectedDate === today) return jarvis.mission;
+    if (!jarvis.planWeek || !jarvis.planWeek.days) return null;
+    return jarvis.planWeek.days.find(d => d.date === selectedDate) || null;
+  }, [selectedDate, today, jarvis.mission, jarvis.planWeek]);
 
   // Continuity: consecutive engaged (journal OR session OR gym) or prescribed-rest days. Computed
   // client-side from the records already on the device; recomputed when those resolve.
@@ -69,12 +75,12 @@ export default function Home() {
 
   // If a workout is already logged today, its title labels the gym item (reflects what happened).
   const loggedGymTitle = useMemo(() => {
-    const w = gymApi.getWorkoutForDate(today);
+    const w = gymApi.getWorkoutForDate(selectedDate);
     return w ? w.dayTitle : null;
-  }, [today, gymApi.listWorkouts().length]);
+  }, [selectedDate, gymApi.listWorkouts().length]);
   const { tasks: items } = useMemo(
-    () => checklistItems(mission, { date: today, gymTitle: loggedGymTitle, scenario: jarvis.mentalScenario }),
-    [mission, today, loggedGymTitle, jarvis.mentalScenario],
+    () => checklistItems(mission, { date: selectedDate, gymTitle: loggedGymTitle, scenario: jarvis.mentalScenario }),
+    [mission, selectedDate, loggedGymTitle, jarvis.mentalScenario],
   );
   const band = mission && (mission.readinessBand || (mission.readiness && mission.readiness.band));
   const daysToRace = jarvis.campaign && jarvis.campaign.daysToRace;
@@ -111,7 +117,37 @@ export default function Home() {
       <header className="home-head">
         <Pebble size={44} expression={jarvis.expression} className="pebble-breathe" idle />
         <div className="home-head-text">
-          <div className="home-date muted">{new Date(today + 'T00:00:00').toDateString()}</div>
+          <div className="home-date muted" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>{new Date(selectedDate + 'T00:00:00').toDateString()}</span>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input 
+                type="date" 
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'transparent',
+                  fontFamily: 'inherit',
+                  fontSize: '0.9rem',
+                  padding: 0,
+                  outline: 'none',
+                  cursor: 'pointer',
+                  width: '20px',
+                  height: '20px',
+                  position: 'absolute',
+                  opacity: 0,
+                  zIndex: 2
+                }}
+              />
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: 'none', opacity: 0.7 }}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+          </div>
           <h1 className="home-greet">Morning, Anant</h1>
         </div>
         {daysToRace != null ? (
@@ -135,7 +171,7 @@ export default function Home() {
       </div>
 
       {/* Today's checklist — the tickable list of everything due (agent items, client tick state). */}
-      <Checklist date={today} items={items} onStart={startFromChecklist} />
+      <Checklist date={selectedDate} items={items} onStart={startFromChecklist} />
 
       {/* Continuity thread — faint, forgiving presence; never a flame counter / no red X. */}
       <div className={`continuity continuity-${continuity.state}`}>
